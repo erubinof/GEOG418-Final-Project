@@ -42,7 +42,7 @@ library(spatstat)
 library(knitr)
 library(shinyjs)
 ```
-# Cleaning the Data
+# Cleaning the Climate Data
 
 ```{r CleanData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Set working directory
@@ -163,7 +163,7 @@ for (subdir in subdirectories) {
   }
 }
 ```
-# Merging the Data
+# Merging the Climate Data
 ```{r MergeClimateData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 #Merge the climate data for each station with the location data found in the metadata file
 metadata <- read.csv("./Data/BC_Temp_Data_2021to2023/station-metadata-by-history.csv")
@@ -584,7 +584,7 @@ k.fun <- Kest(pests.ppp, correction = "Ripley")
 k.fun.e <- envelope(pests.ppp, Kest, nsim = 99, correction = "Ripley", verbose = FALSE)
 plot(k.fun.e, main = "")
 ```
-# Map the Forest Pest Disturbance Density
+# Mapping the Forest Pest Disturbance Density
 
 ```{r MapPestDensity, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Ensure bbox2 is valid and formatted correctly
