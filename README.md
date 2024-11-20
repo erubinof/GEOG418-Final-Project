@@ -1,5 +1,6 @@
-# GEOG418-Final-Project
-################
+# GEOG418 Final Project: Winter Temperature's Impact on Forest Pest Infestation
+# Introduction
+
 # Load necessary libraries
 library(tmap)
 library(spdep)
