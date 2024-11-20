@@ -42,6 +42,7 @@ library(spatstat)
 library(knitr)
 library(shinyjs)
 ```
+# Cleaning the Data
 
 ```{r CleanData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Set working directory
@@ -162,7 +163,7 @@ for (subdir in subdirectories) {
   }
 }
 ```
-
+# Merging the Data
 ```{r MergeClimateData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 #Merge the climate data for each station with the location data found in the metadata file
 metadata <- read.csv("./Data/BC_Temp_Data_2021to2023/station-metadata-by-history.csv")
@@ -226,7 +227,7 @@ ggplot() +
        color = "Temperature (°C)") + # Label for color legend
   theme(legend.position = "bottom")
 ```
-
+# IDW Interpolation
 ```{r IDWInterpolation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Read the shapefile
 climate_shp <- st_read("./Output/ClimateData.shp")
@@ -302,7 +303,7 @@ ggplot(data = idw_clipped) +
 # Step 4: Save the map as an image file (optional)
 ggsave("./Output/Clipped_IDW_Interpolation_Map.png", width = 10, height = 8, dpi = 300)
 ```
-
+# Kriging Interpolation
 ```{r KrigingInterpolation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 f.0 <- as.formula(TEMP ~ 1) 
 
@@ -365,6 +366,8 @@ kriging_map
 
 # Save the map
 tmap_save(kriging_map, filename = "./Output/Kriging_map.png", width = 10, height = 8, dpi = 300)
+```
+# Forest Pest Disturbance Descriptive Statistics
 
 ```{r PestDescriptiveStats, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Load your point data and filter it to 2022
@@ -472,6 +475,7 @@ map_TM
 
 tmap_save(map_TM, "./Output/PestInfestLocation_MeanCentre.png", width = 10, height = 8, dpi = 300)
 ```
+# Point Pattern Analysis
 
 ```{r PointPatternAnalysis, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 ### Nearest Neighbour Analysis
@@ -580,6 +584,7 @@ k.fun <- Kest(pests.ppp, correction = "Ripley")
 k.fun.e <- envelope(pests.ppp, Kest, nsim = 99, correction = "Ripley", verbose = FALSE)
 plot(k.fun.e, main = "")
 ```
+# Map the Forest Pest Disturbance Density
 
 ```{r MapPestDensity, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Ensure bbox2 is valid and formatted correctly
@@ -681,7 +686,6 @@ ggplot(data = final_data) +
   ) +
   theme(legend.position = "right")
 
-
 # Save final_data as a shapefile
 st_write(final_data, "./Output/final_data.shp", driver = "ESRI Shapefile", delete_dsn = TRUE)
 
@@ -691,6 +695,7 @@ final_data_df <- st_drop_geometry(final_data)
 # Write as CSV
 write.csv(final_data_df, "./Output/final_data.csv", row.names = FALSE)
 ```
+# Ordinary Least Squares Regression
 
 ```{r OLSRegression, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Read the shapefile
@@ -721,6 +726,7 @@ ggplot(data = final_data_sf$residuals) +
 # Optional: Save the plot if desired
 ggsave("./Output/residuals_map.png", width = 10, height = 8, dpi = 300)
 ```
+# Spatial Autocorrelation of Residuals
 
 ```{r SpatialAutocorrelation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Making a neighbourhood matrix with Inverse Distance Weighting
@@ -811,6 +817,7 @@ tmap_save(map_LISA_Pest, "./Output/LocalMoransI.png", width = 10, height = 8, dp
 moran.plot(final_data_sf$residuals, pest.listw, zero.policy=TRUE, spChk=NULL, labels=NULL, xlab="Pest Infestation Residuals", 
            ylab="Spatially Lagged Pest Infestation Residuals", quiet=NULL)
 ```
+# Geographic Weighted Regression
 
 ```{r GWRRegression, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Preview the data to check variable names and content
@@ -898,4 +905,6 @@ tm_gwr
 # Optional: Save the plot
 tmap_save(tm_gwr, "./Output/gwr_coefficients_fixed_bandwidth.png", width = 10, height = 8, dpi = 300)
 ```
+# Conclusion
 
+# References
