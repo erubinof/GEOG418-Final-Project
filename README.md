@@ -1,5 +1,26 @@
 # GEOG418 Final Project: Winter Temperature's Impact on Forest Pest Infestation
+Created by: Ezra Rubinoff
 # Introduction
+
+```{r Libraries, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
+# Install necessary libraries
+install.packages("tmap")
+install.packages("spdep")
+install.packages("raster")
+install.packages("sf")
+install.packages("lubridate")
+install.packages("dplyr")
+install.packages("gstat")
+install.packages("ggplot2")
+install.packages("maps")
+install.packages("viridis")
+install.packages("spgwr")
+install.packages("e1071")
+install.packages("gridExtra")
+install.packages("gtable")
+install.packages("spatstat")
+install.packages("knitr")
+install.packages("shinyjs")
 
 # Load necessary libraries
 library(tmap)
@@ -11,7 +32,7 @@ library(dplyr)
 library(gstat)
 library(ggplot2)
 library(maps)
-library(viridis)  # For color scales
+library(viridis)
 library(spgwr)
 library(e1071)
 library(gridExtra)
@@ -20,12 +41,12 @@ library(gtable)
 library(spatstat)
 library(knitr)
 library(shinyjs)
+```
 
+```{r CleanData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Set working directory
 dir <- "C:/Users/Ezra Rubinoff/Desktop/UVIC/Term 12-Fall 2024/GEOG 418/Final Project"
 setwd(dir)
-
-# CLEAN CLIMATE DATA
 
 # Create an empty data frame with specified columns
 empty_data <- data.frame(Native.ID = character(), TEMP = numeric(), 
@@ -140,9 +161,9 @@ for (subdir in subdirectories) {
     write.csv(data, file = csv_file_name, row.names = FALSE)
   }
 }
+```
 
-###################
-# MERGE CLIMATE DATA
+```{r MergeClimateData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 #Merge the climate data for each station with the location data found in the metadata file
 metadata <- read.csv("./Data/BC_Temp_Data_2021to2023/station-metadata-by-history.csv")
 climatedata <- read.csv("./Data/BC_AVG_TEMP.csv")
@@ -164,8 +185,7 @@ merged_data <- merged_data[merged_data$TEMP <= 100, ]
 #Write the dataset so that it  is stored
 write.csv(merged_data, file = "./Data/ClimateData.csv", row.names = FALSE)
 
-####################
-# MAP CLIMATE DATA
+```{r MapClimateData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Ensure Latitude and Longitude columns are correctly formatted
 # Assuming the columns are named "Latitude" and "Longitude"
 climate_data <- read.csv("./Data/ClimateData.csv")
@@ -205,10 +225,9 @@ ggplot() +
        y = "Latitude",   # Use Latitude for y-axis
        color = "Temperature (°C)") + # Label for color legend
   theme(legend.position = "bottom")
+```
 
-################
-# IDW INTERPOLATION
-
+```{r IDWInterpolation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Read the shapefile
 climate_shp <- st_read("./Output/ClimateData.shp")
 
@@ -243,9 +262,6 @@ ggplot(data = idw_sf) +
 
 # Save the result to a shapefile if needed
 st_write(idw_sf, "./Output/IDW_Result.shp", driver = "ESRI Shapefile", delete_dsn = TRUE)
-
-
-#########################################
 
 # Verify the structure of the polygon shapefile
 print(head(bc_boundary))
@@ -285,10 +301,9 @@ ggplot(data = idw_clipped) +
 
 # Step 4: Save the map as an image file (optional)
 ggsave("./Output/Clipped_IDW_Interpolation_Map.png", width = 10, height = 8, dpi = 300)
+```
 
-##############
-# KRIGING INTERPOLATION
-
+```{r KrigingInterpolation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 f.0 <- as.formula(TEMP ~ 1) 
 
 # Create variogram. Be sure to test out the three different models.
@@ -351,18 +366,12 @@ kriging_map
 # Save the map
 tmap_save(kriging_map, filename = "./Output/Kriging_map.png", width = 10, height = 8, dpi = 300)
 
-##############
-##############
-##############
-# PEST EVENTS DESCRIPTIVE STATISTICS AND DENSITY
-
+```{r PestDescriptiveStats, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Load your point data and filter it to 2022
 Pest_Infest_point <- st_read("./Data/BC_Pest_Data/BCGW_7113060B_1729806658214_18952/PEST_INFESTATION_POINT/PST_IF_PT_point.shp")
 Pest_Infest_2022 <- subset(Pest_Infest_point, CPTR_YR == 2022)
 
-##############
 #Descriptive Statistics and Point Pattern Analysis
-
 # Calculate descriptive stats
 mean_numtrees <- mean(Pest_Infest_2022$NUM_TREES)
 sd_numtrees <- sd(Pest_Infest_2022$NUM_TREES, na.rm = TRUE)
@@ -462,10 +471,9 @@ map_TM <- tm_shape(bc_boundary) +
 map_TM
 
 tmap_save(map_TM, "./Output/PestInfestLocation_MeanCentre.png", width = 10, height = 8, dpi = 300)
+```
 
-##############
-# Conduct Point Pattern Analysis
-
+```{r PointPatternAnalysis, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 ### Nearest Neighbour Analysis
 
 # Create an observation window
@@ -550,7 +558,6 @@ VAR <- ((sum.f.x2) - (sum.fx.2 / M)) / (M - 1)
 MEAN <- (N/M)
 VMR <- (VAR/MEAN)
 
-
 ##Finally, perform the test statistic to test for the existence of a random spatial pattern.
 chi.square = VMR * (M - 1)
 p = 1 - pchisq(chi.square, (M - 1))
@@ -572,10 +579,9 @@ k.fun <- Kest(pests.ppp, correction = "Ripley")
 #use simulation to test the point pattern against CSR
 k.fun.e <- envelope(pests.ppp, Kest, nsim = 99, correction = "Ripley", verbose = FALSE)
 plot(k.fun.e, main = "")
+```
 
-#############
-# Calculate and map density
-
+```{r MapPestDensity, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Ensure bbox2 is valid and formatted correctly
 bbox2 <- st_bbox(bc_boundary)
 
@@ -684,9 +690,9 @@ final_data_df <- st_drop_geometry(final_data)
 
 # Write as CSV
 write.csv(final_data_df, "./Output/final_data.csv", row.names = FALSE)
+```
 
-## ORDINARY LEAST SQUARES REGRESSION
-
+```{r OLSRegression, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Read the shapefile
 final_data_sf <- st_read("./Output/final_data.shp")
 
@@ -714,10 +720,9 @@ ggplot(data = final_data_sf$residuals) +
 
 # Optional: Save the plot if desired
 ggsave("./Output/residuals_map.png", width = 10, height = 8, dpi = 300)
+```
 
-#############
-# Spatial Autocorrelation on residuals
-
+```{r SpatialAutocorrelation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Making a neighbourhood matrix with Inverse Distance Weighting
 # Define a maximum distance threshold (e.g., 100 km)
 max_distance <- 100000  # in meters
@@ -805,9 +810,9 @@ tmap_save(map_LISA_Pest, "./Output/LocalMoransI.png", width = 10, height = 8, dp
 #Create Moran's I scatter plot for Income
 moran.plot(final_data_sf$residuals, pest.listw, zero.policy=TRUE, spChk=NULL, labels=NULL, xlab="Pest Infestation Residuals", 
            ylab="Spatially Lagged Pest Infestation Residuals", quiet=NULL)
+```
 
-## PERFORM GEOGRAPHIC WEIGHTED REGRESSION
-
+```{r GWRRegression, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Preview the data to check variable names and content
 print(head(final_data_sf))
 print(colnames(final_data_sf))
@@ -892,3 +897,5 @@ tm_gwr
 
 # Optional: Save the plot
 tmap_save(tm_gwr, "./Output/gwr_coefficients_fixed_bandwidth.png", width = 10, height = 8, dpi = 300)
+```
+
