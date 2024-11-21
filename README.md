@@ -477,7 +477,7 @@ map_TM
 tmap_save(map_TM, "./Output/PestInfestLocation_MeanCentre.png", width = 10, height = 8, dpi = 300)
 ```
 # Point Pattern Analysis
-
+Talk about first order and second order here
 ```{r PointPatternAnalysis, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 ### Nearest Neighbour Analysis
 
