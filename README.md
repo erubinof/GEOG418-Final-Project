@@ -1,7 +1,9 @@
-# GEOG418 Final Project: Winter Temperature's Impact on Forest Pest Infestation
+# GEOG418 Final Project
+# An Analysis on Winter Temperature's Impact on Forest Pest Infestation in BC: R Coding Tutorial
 Created by: Ezra Rubinoff
 # Introduction
 
+The first step in preparing to conduct this analysis is installing and loading the packages and libraries that are needed. All the tools used in this tutorial are from these packages that allow you to use more complex functions than are possible with the base R libraries.
 ```{r Libraries, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Install necessary libraries
 install.packages("tmap")
@@ -36,7 +38,6 @@ library(viridis)
 library(spgwr)
 library(e1071)
 library(gridExtra)
-library(grid)
 library(gtable)
 library(spatstat)
 library(knitr)
