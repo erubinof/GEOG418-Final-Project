@@ -53,7 +53,11 @@ library(knitr)
 library(shinyjs)
 ```
 # Cleaning the Climate Data
+Once you have downloaded the data from this github page and placed it into the folder you will be working in, the data is ready to be cleaned and prepared for analysis.
 
+The first step is to set your working directory to inform the code where to look for the data and where to save your data and figures to. This working directory needs to be set for the project once, and everything from now on will be pulled from or saved into that folder.
+
+Once that is complete, we can begin to bring in the data and save it in a format that will be usable. As this climate data was downloaded as individual station csv files from PCIC, we have to instruct the code to go into each one and extract the important temperature information. To get a more spatially diverse sampling of data, we had to collect it from multiple agencies with different ways of formatting the data. This means that in the cleaning process, we have to make sure all the different formats are accepted, and that all the outliers are taken out. To do this, the code only looks for the correct column for air temperature as defined by the subdirectory that the csv file is in. It also filters out any temperatures recorded between -50C and 60C, as that is the range of natural temperatures on the surface of the earth. Lastly, the code averages the data based on the date to make the final output an average temperature for November 2021 to March 2022 for each of the climate stations. The result of this code is a CSV that contains a value for temperature for each of the stations.
 ```{r CleanData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Set working directory
 dir <- "C:/Users/Ezra Rubinoff/Desktop/UVIC/Term 12-Fall 2024/GEOG 418/Final Project"
