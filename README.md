@@ -9,7 +9,10 @@ This tutorial aims to show how analysis can be done using R to analyse if winter
 -	Do lower winter temperatures lead to lower incidences of forest pest infestation events in the following summer?
 -	How will humans be impacted by these findings?
 
-The first step in preparing to conduct this analysis is installing and loading the packages and libraries that are needed. All the tools used in this tutorial are from these packages that allow you to use more complex functions than are possible with the base R libraries.
+# Setting Up the Workspace
+For this tutorial, we will be using R to conduct our analysis. While the base installation of R provides many useful functions, more specialized calculations and visualizations often require additional packages and libraries. These packages can be installed and loaded through RStudio, expanding the functionality of R and enabling more complex workflows.
+
+In this case, we are interested in capabilities such as creating thematic maps, performing spatial analysis, managing spatial data, handling dates and times, performing statistical modeling, and generating high-quality visualizations. These tasks require specific packages to be installed. To do so, we use the install.packages() function to add them to our system. Once installed, we can load them into our project with the library() function. With these packages in place, the functions and tools they provide will be ready for use in our analysis.
 ```{r Libraries, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Install necessary libraries
 install.packages("tmap")
