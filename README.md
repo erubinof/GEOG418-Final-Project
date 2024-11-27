@@ -2,6 +2,7 @@
 # An Analysis on Winter Temperature's Impact on Forest Pest Infestation in BC: R Coding Tutorial
 Created by: Ezra Rubinoff
 # Introduction
+From 2010-2020 in British Columbia, forest pests impacted 6,793,100 hectares a year on average (National Forestry Database). That is equal to about 11% of all forest land in BC! In the context of climate change, trees are a key factor in balancing the carbon in our atmosphere through carbon sequestration. As they grow, they absorb CO2, a greenhouse gas, that is stored in the biomass of the tree, and only released when it burns or decays. Insect damage directly leads to the decay of trees, and indirectly to increased CO2 in the atmosphere and therefore climate change (Forest Carbon, 2013).
 
 The first step in preparing to conduct this analysis is installing and loading the packages and libraries that are needed. All the tools used in this tutorial are from these packages that allow you to use more complex functions than are possible with the base R libraries.
 ```{r Libraries, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
