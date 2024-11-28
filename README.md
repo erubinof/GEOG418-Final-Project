@@ -1,7 +1,7 @@
-# GEOG418 Final Project
+GEOG418 Final Project
 # An Analysis on Winter Temperature's Impact on Forest Pest Infestation in BC: R Coding Tutorial
 Created by: Ezra Rubinoff
-# Introduction
+## Introduction
 From 2010-2020 in British Columbia, forest pests impacted 6,793,100 hectares a year on average (National Forestry Database). That is equal to about 11% of all forest land in BC! In the context of climate change, trees are a key factor in balancing the carbon in our atmosphere through carbon sequestration. As they grow, they absorb CO2, a greenhouse gas that is stored in the biomass of the tree, and only release it when the tree burns or decays. Insect damage directly leads to the decay of trees, and indirectly to increased CO2 in the atmosphere and therefore climate change (Forest Carbon, 2013). Exploring how temperature can impact these pests is important as we look to slow carbon emissions and manage our climate. Recent studies have shown that severe cold events can reduce the size of forest pest outbreaks, limiting their ability to cause tree decay (MacQuarrie et al., 2024). They also explain that the intensity of winter weather conditions can limit both the range and impact of those pests, preventing them from distributing and impacting more forests(MacQuarrie et al., 2024). In a study focused on BC's forest pests, researchers explain that increased winter temperatures is a climate change prediction with a high degree of confidence (Woods, 2011). The concern these researchers show is due to the Mountain Pine Beetles' (MPB) vulnerability to cold winter temperatures, so with the projected increases, the MPB epidemic that is occuring could get worse (Woods, 2011). This not only shows that there is a strong connection between forest pests and winter temperature, but also that a dangerous feedback loop could emerge from more tree decay causing increased CO2 in the atmosphere and therefore higher winter temperatures and more pest disturbance.
 
 This tutorial aims to show how analysis can be done using R to analyse if winter temperatures explain higher incidences of forest pest disturbance in the following summer in British Columbia. At the end, we will be able to answer these three questions:
@@ -9,7 +9,7 @@ This tutorial aims to show how analysis can be done using R to analyse if winter
 -	Do lower winter temperatures lead to lower incidences of forest pest infestation events in the following summer?
 -	How will humans be impacted by these findings?
 
-# Setting Up the Workspace
+## Setting Up the Workspace
 For this tutorial, we will be using R to conduct our analysis. While the base installation of R provides many useful functions, more specialized calculations and visualizations often require additional packages and libraries. These packages can be installed and loaded through RStudio, expanding the functionality of R and enabling more complex workflows.
 
 In this case, we are interested in capabilities such as creating thematic maps, performing spatial analysis, managing spatial data, handling dates and times, performing statistical modeling, and generating high-quality visualizations. These tasks require specific packages to be installed. To do so, we use the install.packages() function to add them to our system. Once installed, we can load them into our project with the library() function. With these packages in place, the functions and tools they provide will be ready for use in our analysis.
@@ -52,7 +52,7 @@ library(spatstat)
 library(knitr)
 library(shinyjs)
 ```
-# Cleaning the Climate Data
+## Cleaning the Climate Data
 Once you have downloaded the data from this github page and placed it into the folder you will be working in, the data is ready to be cleaned and prepared for analysis.
 
 The first step is to set your working directory to inform the code where to look for the data and where to save your data and figures to. This working directory needs to be set for the project once, and everything from now on will be pulled from or saved into that folder.
@@ -177,7 +177,7 @@ for (subdir in subdirectories) {
   }
 }
 ```
-# Merging the Climate Data
+## Merging the Climate Data
 Now that the climate data has been cleaned, we must turn the CSV with a temperature value and name of a station into spatial data. We can do this using the metadata we downloaded alongside the climate data. This metadata contains the location information for each of the stations with their IDs, which will allow us to link these two datasets together. This section of code outputs a csv with the temperature data and the latitude and longitude coordinates of each of the stations. 
 ```{r MergeClimateData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 #Merge the climate data for each station with the location data found in the metadata file
@@ -201,7 +201,7 @@ merged_data <- merged_data[merged_data$TEMP <= 100, ]
 #Write the dataset so that it  is stored
 write.csv(merged_data, file = "./Data/ClimateData.csv", row.names = FALSE)
 ```
-# Mapping the Climate Data
+## Mapping the Climate Data
 This next step is visualizing the data so we can interpret it. To do this, we will first create a shapefile of the data so it can be used later. Then, using the ggplot library, we will make a map with a descriptive title and informative legend.
 ```{r MapClimateData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Ensure Latitude and Longitude columns are correctly formatted
@@ -250,10 +250,10 @@ ggplot() +
 <p style="text-align: center;"><em>Figure 1: Map of 2021-2022 average winter temperature in BC for each of the climate stations used</em></p>
 
 You can see a pattern start to emerge here as the coastal and southern areas appear to have warmer winters that the northern areas. It is also important to note that the distribution of climate stations are not even and some areas are more sampled then others. This means some of the less accessible areas will not have values. 
-# Climate Data Interpolation
+## Climate Data Interpolation
 As we want to use this climate data to analyze our patterns of forest pest disturbance, points could cause a problem because not all of the pest disturbance events will land on an area with a climate station. For that reason, we will need to interpolate a surface to try and estimate the average temperature for all of BC. There are two methods that we will use for this, the first is Inverse Distance Weighting (IDW), and the second is Kriging. Both have their benefits and drawbacks so we will go through them to determine which will be best for this analysis.
 
-# Inverse Distance Weighting (IDW)
+### Inverse Distance Weighting (IDW)
 
 ```{r IDWInterpolation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Read the shapefile
@@ -330,7 +330,7 @@ ggplot(data = idw_clipped) +
 # Step 4: Save the map as an image file (optional)
 ggsave("./Output/Clipped_IDW_Interpolation_Map.png", width = 10, height = 8, dpi = 300)
 ```
-# Kriging Interpolation
+### Kriging Interpolation
 ```{r KrigingInterpolation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 f.0 <- as.formula(TEMP ~ 1) 
 
