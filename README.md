@@ -178,6 +178,7 @@ for (subdir in subdirectories) {
 }
 ```
 # Merging the Climate Data
+Now that the climate data has been cleaned, we must turn the CSV with a temperature value and name of a station into spatial data. We can do this using the metadata we downloaded alongside the climate data. This metadata contains the location information for each of the stations with their IDs, which will allow us to link these two datasets together. This section of code outputs a csv with the temperature data and the latitude and longitude coordinates of each of the stations. 
 ```{r MergeClimateData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 #Merge the climate data for each station with the location data found in the metadata file
 metadata <- read.csv("./Data/BC_Temp_Data_2021to2023/station-metadata-by-history.csv")
@@ -199,7 +200,9 @@ merged_data <- merged_data[merged_data$TEMP <= 100, ]
 
 #Write the dataset so that it  is stored
 write.csv(merged_data, file = "./Data/ClimateData.csv", row.names = FALSE)
-
+```
+# Mapping the Climate Data
+This next step is visualizing the data so we can interpret it. To do this, we will first create a shapefile of the data so it can be used later. Then, using the ggplot library, we will make a map with a descriptive title and informative legend.
 ```{r MapClimateData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Ensure Latitude and Longitude columns are correctly formatted
 # Assuming the columns are named "Latitude" and "Longitude"
@@ -241,7 +244,17 @@ ggplot() +
        color = "Temperature (°C)") + # Label for color legend
   theme(legend.position = "bottom")
 ```
-# IDW Interpolation
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/5f759e01-34bc-43a7-8501-4af7f67db67f" alt="Climate Map" width="1500" />
+</div>
+<p style="text-align: center;"><em>Figure 1: Map of 2021-2022 average winter temperature in BC for each of the climate stations used</em></p>
+
+You can see a pattern start to emerge here as the coastal and southern areas appear to have warmer winters that the northern areas. It is also important to note that the distribution of climate stations are not even and some areas are more sampled then others. This means some of the less accessible areas will not have values. 
+# Climate Data Interpolation
+As we want to use this climate data to analyze our patterns of forest pest disturbance, points could cause a problem because not all of the pest disturbance events will land on an area with a climate station. For that reason, we will need to interpolate a surface to try and estimate the average temperature for all of BC. There are two methods that we will use for this, the first is Inverse Distance Weighting (IDW), and the second is Kriging. Both have their benefits and drawbacks so we will go through them to determine which will be best for this analysis.
+
+# Inverse Distance Weighting (IDW)
+
 ```{r IDWInterpolation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Read the shapefile
 climate_shp <- st_read("./Output/ClimateData.shp")
