@@ -333,12 +333,17 @@ ggplot(data = idw_clipped) +
 ggsave("./Output/Clipped_IDW_Interpolation_Map.png", width = 10, height = 8, dpi = 300)
 ```
 <div style="display: flex;">
-  <img src="https://github.com/user-attachments/assets/00e3617e-fdb5-4916-8936-5f8b2b4bc4ec" alt="IDW Map" width="1500" />
+  <img src="https://github.com/user-attachments/assets/00e3617e-fdb5-4916-8936-5f8b2b4bc4ec" alt="IDW Map" width="500" />
 </div>
 <p style="text-align: center;"><em>Figure 2: Map of IDW interpolation of the average winter temperature in BC from 2021-2022</em></p>
 
-### Kriging Interpolation
-```{r KrigingInterpolation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
+This shows one method of interpolation that creates a surface with each pixel representing an average winter temperature from November 2021-March 2022. This somewhat follows the pattern that we could see when we just mapped the climate station points.
+### Kriging
+The second interpolation method we will use is Kriging. Kriging is a spatial interpolation technique that predicts values at unsampled locations based on the spatial autocorrelation of the known data points. Unlike IDW, which relies on distance-based weights, Kriging incorporates a statistical model of the spatial relationships between points, represented by a semivariogram. The semivariogram is a key component in Kriging, as it describes how the variance between values changes with distance, allowing the interpolation to account for both the strength and range of spatial dependency. This makes Kriging strong for capturing complex spatial patterns. Kriging is often considered a global interpolation method because it uses data from the entire dataset, rather than focusing only on nearby points, to predict values. This global approach can provide more accurate results when there are clear spatial trends or when the data exhibits consistent patterns over larger areas.
+
+We will now walk through a process to prepare for the Kriging interpolation using our climate data. First we define the model formula as TEMP ~ 1, which tells the Kriging algorithm to predict the temperature across the study area without including any additional predictors. Then, we create the semivariogram using our climate data. This step involves analyzing how the temperature values vary with distance between data points. We can fit a spherical semivariogram model ("Sph") with the following parameters: a nugget of 8, a sill of 40 , and a range of 600,000. After fitting the model, we’ll visualize it with a plot to confirm the fit.
+
+```{r KrigingSemivariance, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 f.0 <- as.formula(TEMP ~ 1) 
 
 # Create variogram. Be sure to test out the three different models.
@@ -347,7 +352,16 @@ dat.fit  <- fit.variogram(var.smpl, fit.ranges = TRUE, fit.sills = TRUE,
                           vgm(model="Sph", nugget = 8, psill = 40, 
                               range = 600000))
 plot(var.smpl, dat.fit)
+```
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/35291b63-e528-4c8f-b1ac-710a3a425a00" alt="Semivariogram" width="700" />
+</div>
+<p style="text-align: center;"><em>Figure 3: Plot of semivariogram</em></p>
 
+As the plot shows, the line closely follows the points and therefore is a good fit. We can now continue with our interpolation.
+
+The next step is to define the grid, which we have already determined to be a 25,000 square metre cell size to match our IDW resolution. Lastly, we can apply the Kriging method using the semivariogram model, the formula, the climate data, and the prediction grid. This step calculates predicted temperature values at each grid point based on the spatial relationships derived from the semivariogram. The result is a detailed spatial map of predicted temperatures across the study area, which we then clip to the BC boundary and output as a formatted map.
+```{r KrigingInterpolation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Define the grid
 xmin <- st_bbox(bc_boundary)$xmin
 xmax <- st_bbox(bc_boundary)$xmax
@@ -401,6 +415,12 @@ kriging_map
 # Save the map
 tmap_save(kriging_map, filename = "./Output/Kriging_map.png", width = 10, height = 8, dpi = 300)
 ```
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/0c7bc2a8-8dcc-4c4c-96f6-923cdbf928cf" alt="Kriging Map" width="700" />
+</div>
+<p style="text-align: center;"><em>Figure 4: Map of interpolated climate data across BC for November 2021-March 2022 using Kriging</em></p>
+
+Now we have interpolated with both IDW and Kriging
 # Forest Pest Disturbance Descriptive Statistics
 
 ```{r PestDescriptiveStats, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
