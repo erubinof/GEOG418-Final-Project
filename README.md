@@ -251,10 +251,12 @@ ggplot() +
 
 You can see a pattern start to emerge here as the coastal and southern areas appear to have warmer winters that the northern areas. It is also important to note that the distribution of climate stations are not even and some areas are more sampled then others. This means some of the less accessible areas will not have values. 
 ## Climate Data Interpolation
-As we want to use this climate data to analyze our patterns of forest pest disturbance, points could cause a problem because not all of the pest disturbance events will land on an area with a climate station. For that reason, we will need to interpolate a surface to try and estimate the average temperature for all of BC. There are two methods that we will use for this, the first is Inverse Distance Weighting (IDW), and the second is Kriging. Both have their benefits and drawbacks so we will go through them to determine which will be best for this analysis.
+As we want to use this climate data to analyze our patterns of forest pest disturbance, points could cause a problem because not all of the pest disturbance events will land on an area with a climate station. For that reason, we will need to interpolate a surface to try and estimate the average temperature for all of BC. Interpolation is the process of turning a point dataset into a raster dataset, where each pixel of the study area has a value associated with it. These values are determined based on the method of interpolation. There are two methods that we will use for this, the first is Inverse Distance Weighting (IDW), and the second is Kriging. Both have their benefits and drawbacks so we will go through them to determine which will be best for this analysis.
 
 ### Inverse Distance Weighting (IDW)
+The first interpolation method we will try is Inverse Distance Weighting or IDW. IDW is a spatial interpolation technique that estimates values at unsampled locations based on a weighted average of nearby known values. The main idea of IDW is that the closer a sample point is to the prediction location, the more influence it has on the predicted value. The power value in IDW is an important factor that influences the smoothness of the interpolated surface. It determines the rate at which the weight of a sample point decreases when increasing distance from the prediction location. Lower power values, like 1 or 2, result in smoother interpolated surfaces, as the influence of further points is higher. This can be useful when the underlying spatial process is believed to be smooth and continuous. Higher power values, like 3 or 4, lead to more localized and detailed interpolated surfaces, as the influence of distant points is decreased. This can be appropriate when the spatial process is contains rapid variations or local trends.
 
+For this application, there are 2 parameters to enter. The first is the grid size for the output. A higher grid size would lead to a smoother surface and less computational power required, but it could miss important features that a finer grid could catch. In this case, we selected a cellsize of 25,000 to try and find a balance between both. The other parameter is the power value (idp), which we have selected 2 as the temperature should be smooth not have too many local trends acorss BC. Once this has all been set, we can run the interpolation and output a map of the result. To make the map more readable, we also have clipped it to the boundary of BC.
 ```{r IDWInterpolation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Read the shapefile
 climate_shp <- st_read("./Output/ClimateData.shp")
@@ -330,6 +332,11 @@ ggplot(data = idw_clipped) +
 # Step 4: Save the map as an image file (optional)
 ggsave("./Output/Clipped_IDW_Interpolation_Map.png", width = 10, height = 8, dpi = 300)
 ```
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/00e3617e-fdb5-4916-8936-5f8b2b4bc4ec" alt="IDW Map" width="1500" />
+</div>
+<p style="text-align: center;"><em>Figure 2: Map of IDW interpolation of the average winter temperature in BC from 2021-2022</em></p>
+
 ### Kriging Interpolation
 ```{r KrigingInterpolation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 f.0 <- as.formula(TEMP ~ 1) 
