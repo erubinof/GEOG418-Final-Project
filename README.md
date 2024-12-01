@@ -5,9 +5,9 @@ Created by: Ezra Rubinoff
 From 2010-2020 in British Columbia, forest pests impacted 6,793,100 hectares a year on average (National Forestry Database). That is equal to about 11% of all forest land in BC! In the context of climate change, trees are a key factor in balancing the carbon in our atmosphere through carbon sequestration. As they grow, they absorb CO2, a greenhouse gas that is stored in the biomass of the tree, and only release it when the tree burns or decays. Insect damage directly leads to the decay of trees, and indirectly to increased CO2 in the atmosphere and therefore climate change (Forest Carbon, 2013). Exploring how temperature can impact these pests is important as we look to slow carbon emissions and manage our climate. Recent studies have shown that severe cold events can reduce the size of forest pest outbreaks, limiting their ability to cause tree decay (MacQuarrie et al., 2024). They also explain that the intensity of winter weather conditions can limit both the range and impact of those pests, preventing them from distributing and impacting more forests(MacQuarrie et al., 2024). In a study focused on BC's forest pests, researchers explain that increased winter temperatures is a climate change prediction with a high degree of confidence (Woods, 2011). The concern these researchers show is due to the Mountain Pine Beetles' (MPB) vulnerability to cold winter temperatures, so with the projected increases, the MPB epidemic that is occuring could get worse (Woods, 2011). This not only shows that there is a strong connection between forest pests and winter temperature, but also that a dangerous feedback loop could emerge from more tree decay causing increased CO2 in the atmosphere and therefore higher winter temperatures and more pest disturbance.
 
 This tutorial aims to show how analysis can be done using R to analyse if winter temperatures explain higher incidences of forest pest disturbance in the following summer in British Columbia. At the end, we will be able to answer these three questions:
-- What is the spatial distribution pattern of forest pest distrurbances in BC
+- What is the spatial distribution pattern of forest pest distrurbances in BC?
+- What is the best method of interpolating average winter temperature data across BC?
 -	Do lower winter temperatures lead to lower incidences of forest pest infestation events in the following summer?
--	How will humans be impacted by these findings?
 
 ## Setting Up the Workspace
 For this tutorial, we will be using R to conduct our analysis. While the base installation of R provides many useful functions, more specialized calculations and visualizations often require additional packages and libraries. These packages can be installed and loaded through RStudio, expanding the functionality of R and enabling more complex workflows.
@@ -420,9 +420,11 @@ tmap_save(kriging_map, filename = "./Output/Kriging_map.png", width = 10, height
 </div>
 <p style="text-align: center;"><em>Figure 4: Map of interpolated climate data across BC for November 2021-March 2022 using Kriging</em></p>
 
-Now we have interpolated with both IDW and Kriging
+Now we have interpolated with both IDW and Kriging, we can see some of of their benefits and drawbacks. For this data, the best option to continue on with is IDW, as it seems to handle the unevenly distributed data much better than Kriging. In the Kriging map above, it is clear that the areas with more samples sees the most differences and IDW is able to capture some of the more localized trends in the interior of the province.
 # Forest Pest Disturbance Descriptive Statistics
+Moving along from the climate data, we can begin to prepare and understand our forest pest disturbance event data that we will need to conduct our analysis. This data was downloaded from the BC Data Catalogue. Each point contains the year of survey, forest health factor (disturbance agent), severity class, area, numbers of trees estimated in the spot, and host (BC Data Catalogue, 2023). For this project, we will filter the data to only use points that mark the year as 2022.
 
+The first step we must take to understand the dataset is calculate some descriptive statistics. For this data, we will use the number of trees that each point represents as our value. This will give us good insight into the types of events that we are dealing with and what the damage looks like.
 ```{r PestDescriptiveStats, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Load your point data and filter it to 2022
 Pest_Infest_point <- st_read("./Data/BC_Pest_Data/BCGW_7113060B_1729806658214_18952/PEST_INFESTATION_POINT/PST_IF_PT_point.shp")
@@ -482,7 +484,10 @@ table2 <- gtable_add_grob(table2,
 
 grid.arrange(table1, newpage = TRUE)
 grid.arrange(table2, newpage = TRUE)
+```
 
+# Mapping the Forest Pest Disturbance Events
+```{r PestMapping, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Map all the pest infestation points with the mean centre
 # Extract coordinates
 coords <- st_coordinates(Pest_Infest_2022)
