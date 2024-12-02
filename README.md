@@ -485,8 +485,16 @@ table2 <- gtable_add_grob(table2,
 grid.arrange(table1, newpage = TRUE)
 grid.arrange(table2, newpage = TRUE)
 ```
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/f516db20-14a0-467b-891f-475f78cb0fc7" alt="Descrptive Statistics Table 1" width="500" />
+  <img src="https://github.com/user-attachments/assets/7dca8c30-c831-4624-bbae-8f2778930550" alt="Descrptive Statistics Table 2" width="500" />
+</div>
+<p style="text-align: center;"><em> Figure 5: Descriptive Statistics Tables</em></p>
+
+These tables show that the distribution of the number of trees affected is highly variable and positively skewed, with most infestation points affecting a small number of trees, but a few points experiencing significantly higher impacts. These patterns could be explained by the pest outbreaks, where a few severe infestations disproportionately affect large numbers of trees.
 
 # Mapping the Forest Pest Disturbance Events
+With this insight into what the events look like, it will now be useful to look into the spatial distribution of them. To do that, we will create a map of all of the points with the mean centre marked. 
 ```{r PestMapping, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Map all the pest infestation points with the mean centre
 # Extract coordinates
@@ -534,8 +542,19 @@ map_TM
 
 tmap_save(map_TM, "./Output/PestInfestLocation_MeanCentre.png", width = 10, height = 8, dpi = 300)
 ```
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/fa0cbb20-a6c5-48b3-b3d0-399591236e6c" alt="Mean Centre Map" width="800" />
+</div>
+<p style="text-align: center;"><em> Figure 6: Map of Forest Pest Infestation Points for 2022 in BC with the Mean Centre</em></p>
+
 # Point Pattern Analysis
-Talk about first order and second order here
+To continue exploring the spatial distribution, we will use point pattern analysis. Point pattern analysis is a set of methods used to study the spatial arrangement of individual events or objects within a defined study area. This type of analysis helps us determine whether the points are randomly distributed, clustered, or regularly spaced. In the context of forest pests, point pattern analysis can help understand whether infestations are concentrated in certain regions or evenly spread out across the landscape. By analyzing the spatial patterns, we can identify potential environmental or ecological influence behind these distributions and assess whether the observed patterns are statistically significant.
+
+When analyzing spatial point patterns, we often consider first-order and second-order variability to understand the processes influencing the arrangement of points. First-order variability arises from underlying landscape factors that influence the overall distribution of points across the study area. These are large-scale trends driven by environmental or socioeconomic factors that vary across space, like rainfall causing more landslides.
+
+Second-order variability, on the other hand, focuses on the spatial relationships between points themselves. This is about how the location of one point might influence the location of others nearby. For instance, on a beach, ice cream stands might cluster together because their owners want to take advantage of popular spots or create competition. 
+
+For our analysis we will conduct two different types of point pattern analysis, Nearest Neighbour and Quadrat. Nearest Neighbour Analysis 
 ```{r PointPatternAnalysis, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 ### Nearest Neighbour Analysis
 
