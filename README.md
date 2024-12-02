@@ -554,8 +554,11 @@ When analyzing spatial point patterns, we often consider first-order and second-
 
 Second-order variability, on the other hand, focuses on the spatial relationships between points themselves. This is about how the location of one point might influence the location of others nearby. For instance, on a beach, ice cream stands might cluster together because their owners want to take advantage of popular spots or create competition. 
 
-For our analysis we will conduct two different types of point pattern analysis, Nearest Neighbour and Quadrat. Nearest Neighbour Analysis 
-```{r PointPatternAnalysis, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
+## Nearest Neighbour Analysis
+For our analysis we will conduct two different types of point pattern analysis, Nearest Neighbour and Quadrat. Starting off, Nearest Neighbour Analysis is a statistical method used to evaluate spatial distribution by measuring the distance between each point and its nearest neighbor. These distances are then summed and divided by the total number of points to calculate the average nearest neighbor distance, also known as the mean NND. 
+
+By calculating distances between each point and its closest neighbor, it tests whether the pattern of infestation events are random, clustered, or regularly spaced. The results will provide a statistical summary, including the average nearest neighbor distance and a Z-score, to determine the significance of the observed pattern. Nearest neighbor analysis is primarily a second-order measure as it evaluates the spatial relationships between points by examining the distances to their closest neighbors.
+```{r NearestNeighbourAnalysis, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 ### Nearest Neighbour Analysis
 
 # Create an observation window
@@ -609,9 +612,31 @@ nndResults <- data.frame(StudyArea = round(studyArea, 2),
                          Zscore = round(z, 2), 
                          Ratio = round(R, 2))
 
-#Crate a table of the results.
+#print a table of the results.
 print(nndResults)
 
+# Create table to display the values
+nndtable <- tableGrob(nndResults, rows = c("")) #make a table "Graphical Object" (GrOb) 
+nndCaption <- textGrob("Nearest Neighbour Distance Table", gp = gpar(fontsize = 09))
+padding <- unit(5, "mm")
+
+nndtable <- gtable_add_rows(nndtable, 
+                          heights = grobHeight(nndCaption) + padding, 
+                          pos = 0)
+
+nndtable <- gtable_add_grob(nndtable,
+                          nndCaption, t = 1, l = 2, r = ncol(nndResults) + 1)
+
+grid.arrange(nndtable, newpage = TRUE)
+```
+
+## Quadrat Analysis
+Quadrat analysis is another method used to evaluate the spatial distribution of points, helping determine whether they are clustered, evenly spaced, or randomly distributed. It works by dividing the study area into a grid of equally sized quadrats and counting the number of points within each quadrat. The variation in these counts across the grid is then analyzed statistically to identify patterns in the distribution.
+
+By calculating a variance-to-mean ratio (VMR), quadrat analysis provides insight into the overall spatial pattern. A VMR near 1 suggests a random distribution, a value larger than 1 indicates clustering, and a value less than 1 points to an even distribution. To assess the significance of these patterns, we use a statistical test called the chi-squared test.
+
+This approach is useful for examining large-scale patterns but has limitations, including sensitivity to the size of the quadrats and the inability to capture finer details about point locations within each cell. Quadrat analysis focuses on first-order variability, as it is influenced by underlying landscape factors that affect point density. 
+```{r QuadratAnalysis, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 ##Quadrat Analysis
 ##First, determine the number of quadrats. You need to specify a number that makes sense given the number of points and the size of the study area. Note that quads equals the number of rows or columns in your quads dataset, therefore the actual number is quads^2 
 quads <- 12
