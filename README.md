@@ -850,7 +850,7 @@ ggsave("./Output/Pest_DensityFinalMap.png", width = 10, height = 8, dpi = 300)
 </div>
 <p style="text-align: center;"><em> Figure 12: Clipped Map of Forest Pest Infestation Event Density Across BC in 2022</em></p>
 
-## Mapping Temperature Density
+### Mapping Temperature Density
 Now that we can create a presentable density map, we can also apply the same idea to the temperature data for visualization. 
 ```{r MapTempClipped, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # For temperature, if adding a second scale for temperature:
@@ -1169,7 +1169,9 @@ While this study offers valuable insights, there are limitations, such as the un
 ## References
 BC Data Catalogue. (2023, October 12). https://catalogue.data.gov.bc.ca/dataset/pest-infestation-points
 
-Forest carbon. (2013, July 10). [Natural Resources Canada]. https://natural-resources.canada.ca/climate-change/climate-change-impacts-forests/forest-carbon/13085
+BC Station Data. (2024, October 30). [Pacific Climate Impacts Consortium]. https://services.pacificclimate.org/met-data-portal-pcds/app/
+
+Forest Carbon. (2013, July 10). [Natural Resources Canada]. https://natural-resources.canada.ca/climate-change/climate-change-impacts-forests/forest-carbon/13085
 
 MacQuarrie, C. J. K., Derry, V., Gray, M., Mielewczyk, N., Crossland, D., Ogden, J. B., Boulanger, Y., & Fidgen, J. G. (2024). Effect of a severe cold spell on overwintering survival of an invasive forest insect pest. Current Research in Insect Science, 5, 100077. https://doi.org/10.1016/j.cris.2024.100077
 
