@@ -62,7 +62,7 @@ The first step is to set your working directory to inform the code where to look
 Once that is complete, we can begin to bring in the data and save it in a format that will be usable. As this climate data was downloaded as individual station csv files from PCIC, we have to instruct the code to go into each one and extract the important temperature information. To get a more spatially diverse sampling of data, we had to collect it from multiple agencies with different ways of formatting the data. This means that in the cleaning process, we have to make sure all the different formats are accepted, and that all the outliers are taken out. To do this, the code only looks for the correct column for air temperature as defined by the subdirectory that the csv file is in. It also filters out any temperatures recorded between -50C and 60C, as that is the range of natural temperatures on the surface of the earth. Lastly, the code averages the data based on the date to make the final output an average temperature for November 2021 to March 2022 for each of the climate stations. The result of this code is a CSV that contains a value for temperature for each of the stations.
 ```{r CleanData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Set working directory
-dir <- "C:/Users/Ezra Rubinoff/Desktop/UVIC/Term 12-Fall 2024/GEOG 418/Final Project"
+dir <- "Path/to/your/project/folder"
 setwd(dir)
 
 # Create an empty data frame with specified columns
@@ -78,7 +78,7 @@ if (!file.exists(csv_file_name)) {
 }
 
 # Base directory for the data
-base_dir <- "C:/Users/Ezra Rubinoff/Desktop/UVIC/Term 12-Fall 2024/GEOG 418/Final Project/Data/BC_Temp_Data_2021to2023/pcds_data_ONLYMEANTEMP"
+base_dir <- "Path/to/your/project/folder/Data/pcds_data"
 
 # Subdirectories to process
 subdirectories <- c("BCH", "EC", "ENV-ASP")
@@ -183,7 +183,7 @@ for (subdir in subdirectories) {
 Now that the climate data has been cleaned, we must turn the CSV with a temperature value and name of a station into spatial data. We can do this using the metadata we downloaded alongside the climate data. This metadata contains the location information for each of the stations with their IDs, which will allow us to link these two datasets together. This section of code outputs a csv with the temperature data and the latitude and longitude coordinates of each of the stations. 
 ```{r MergeClimateData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 #Merge the climate data for each station with the location data found in the metadata file
-metadata <- read.csv("./Data/BC_Temp_Data_2021to2023/station-metadata-by-history.csv")
+metadata <- read.csv("./Data/station-metadata-by-history.csv")
 climatedata <- read.csv("./Data/BC_AVG_TEMP.csv")
 
 merged_data <- merge(metadata, climatedata, by = "Native.ID")
@@ -430,7 +430,7 @@ Moving along from the climate data, we can begin to prepare and understand our f
 The first step we must take to understand the dataset is calculate some descriptive statistics. For this data, we will use the number of trees that each point represents as our value. This will give us good insight into the types of events that we are dealing with and what the damage looks like.
 ```{r PestDescriptiveStats, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Load your point data and filter it to 2022
-Pest_Infest_point <- st_read("./Data/BC_Pest_Data/BCGW_7113060B_1729806658214_18952/PEST_INFESTATION_POINT/PST_IF_PT_point.shp")
+Pest_Infest_point <- st_read("./Data/BC_forest_pest_data/PEST_INFESTATION_POINT/PST_IF_PT_point.shp")
 Pest_Infest_2022 <- subset(Pest_Infest_point, CPTR_YR == 2022)
 
 #Descriptive Statistics and Point Pattern Analysis
