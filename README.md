@@ -900,7 +900,7 @@ print(head(final_data_sf))
 st_write(final_data_sf, "./Output/final_data_with_residuals.shp", driver = "ESRI Shapefile", delete_dsn = TRUE)
 
 # Create a map of residuals from the OLS regression
-ggplot(data = final_data_sf$residuals) +
+ggplot(data = final_data_sf) +
   geom_sf(aes(fill = residuals)) + # Map the residuals to fill color
   scale_fill_viridis_c(option = "C", name = "Residuals") + # Use a color scale
   theme_minimal() +
@@ -911,7 +911,18 @@ ggplot(data = final_data_sf$residuals) +
 # Optional: Save the plot if desired
 ggsave("./Output/residuals_map.png", width = 10, height = 8, dpi = 300)
 ```
-# Spatial Autocorrelation of Residuals
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/7975bbe3-5d57-4e37-a2c9-c9e7233ca4b0" alt="OLS Regression Residuals Map" width="800" />
+</div>
+<p style="text-align: center;"><em> Figure 14: Ordinary Least Squares Regression Residuals Map</em></p>
+
+The residuals map shows significant variability in the difference between observed and predicted forest pest infestation event densities, with a wide range of positive and negative residuals. This suggests that the model does not fully capture the spatial variation in pest infestations, as some areas are significantly over- or under-predicted. The large spread of residuals, from negative to very high positive values, indicates that temperature alone may not be a good predictor for forest pest infestations, and there may be other unaccounted factors influencing the distribution. This variability could also suggest the presence of spatial autocorrelation in the residuals, something that we will investigate.
+## Spatial Autocorrelation of OLS Residuals
+After analyzing the residuals from the Ordinary Least Squares (OLS) regression, we can now investigate whether spatial autocorrelation plays a role in the distribution of pest infestations.
+
+Spatial autocorrelation refers to the degree to which a variable at one location is related to the values of the same variable at nearby locations. It helps identify patterns of spatial dependence, where observations that are closer in space, exhibit similar values, or obervations further away show dissimilar values. Positive spatial autocorrelation indicates clustering of similar values, while negative autocorrelation suggests dispersion or the presence of opposing values in close proximity.
+
+This next section of code uses the concept of spatial autocorrelation to examine the relationship between residuals of the pest infestation model and their spatial arrangement. We first create a neighborhood matrix using Inverse Distance Weighting, where the proximity of each observation to its neighbors is taken into account. Using this matrix, we then compute Global Moran's I, which helps identify whether there is significant spatial clustering of the residuals. A positive Moran's I suggests clustering, while a negative value indicates dispersion. Additionally, we conduct a Local Indicators of Spatial Association (LISA) test to identify localized areas where this clustering is most pronounced. The results of these analyses are displayed in maps and scatter plots to provide a clearer understanding of the spatial patterns present in the data.
 
 ```{r SpatialAutocorrelation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Making a neighbourhood matrix with Inverse Distance Weighting
