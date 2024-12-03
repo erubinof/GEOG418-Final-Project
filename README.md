@@ -1,4 +1,4 @@
-GEOG418 Final Project
+GEOG 418 Final Project
 # An Analysis on Winter Temperature's Impact on Forest Pest Infestation in BC: R Coding Tutorial
 Created by: Ezra Rubinoff
 ## Introduction
@@ -917,14 +917,15 @@ ggsave("./Output/residuals_map.png", width = 10, height = 8, dpi = 300)
 <p style="text-align: center;"><em> Figure 14: Ordinary Least Squares Regression Residuals Map</em></p>
 
 The residuals map shows significant variability in the difference between observed and predicted forest pest infestation event densities, with a wide range of positive and negative residuals. This suggests that the model does not fully capture the spatial variation in pest infestations, as some areas are significantly over- or under-predicted. The large spread of residuals, from negative to very high positive values, indicates that temperature alone may not be a good predictor for forest pest infestations, and there may be other unaccounted factors influencing the distribution. This variability could also suggest the presence of spatial autocorrelation in the residuals, something that we will investigate.
+
 ## Spatial Autocorrelation of OLS Residuals
 After analyzing the residuals from the Ordinary Least Squares (OLS) regression, we can now investigate whether spatial autocorrelation plays a role in the distribution of pest infestations.
 
-Spatial autocorrelation refers to the degree to which a variable at one location is related to the values of the same variable at nearby locations. It helps identify patterns of spatial dependence, where observations that are closer in space, exhibit similar values, or obervations further away show dissimilar values. Positive spatial autocorrelation indicates clustering of similar values, while negative autocorrelation suggests dispersion or the presence of opposing values in close proximity.
+Spatial autocorrelation refers to the degree to which a variable at one location is related to the values of the same variable at nearby locations. It helps identify patterns of spatial dependence, where observations that are closer in space, exhibit similar values, or obervations further away show dissimilar values. Positive spatial autocorrelation indicates clustering of similar values, while negative autocorrelation suggests dispersion or the presence of opposing values in close proximity. No autocorrelation means there is a random distribution of values.
 
-This next section of code uses the concept of spatial autocorrelation to examine the relationship between residuals of the pest infestation model and their spatial arrangement. We first create a neighborhood matrix using Inverse Distance Weighting, where the proximity of each observation to its neighbors is taken into account. Using this matrix, we then compute Global Moran's I, which helps identify whether there is significant spatial clustering of the residuals. A positive Moran's I suggests clustering, while a negative value indicates dispersion. Additionally, we conduct a Local Indicators of Spatial Association (LISA) test to identify localized areas where this clustering is most pronounced. The results of these analyses are displayed in maps and scatter plots to provide a clearer understanding of the spatial patterns present in the data.
+This next section of code uses the concept of spatial autocorrelation to examine the relationship between residuals of the pest infestation model and their spatial arrangement. We first create a neighborhood matrix using Inverse Distance Weighting, where the proximity of each observation to its neighbors is taken into account and further neighbours have less weight in the matrix. Using this matrix, we then compute Global Moran's I, which helps identify whether there is significant spatial clustering of the residuals. A positive Global Moran's I suggests clustering, while a negative value indicates dispersion. Additionally, we conduct a Local Moran's I or Local Indicators of Spatial Association (LISA) test to identify localized areas where this clustering is most pronounced. The results of these analyses are displayed in maps and scatter plots to provide a clearer understanding of the spatial patterns present in the data.
 
-```{r SpatialAutocorrelation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
+```{r MoransI, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Making a neighbourhood matrix with Inverse Distance Weighting
 # Define a maximum distance threshold (e.g., 100 km)
 max_distance <- 100000  # in meters
@@ -949,24 +950,13 @@ mIPest <- miPest$estimate[[1]]
 eIPest <- miPest$estimate[[2]]
 varPest <- miPest$estimate[[3]]
 
-# Create a table to display Global Moran's I results for Income and French
-results_table <- data.frame(
-  Variable = c("Pest Infestations"),
-  Moran_I = c(mIPest),
-  Expected_I = c(eIPest),
-  Variance = c(varPest)
-)
-
-# Print the table
-print(results_table)
-
 #Function to calculate the range of global Moran's I
 moran.range <- function(lw) {
   wmat <- listw2mat(lw)
   return(range(eigen((wmat + t(wmat))/2)$values))
 }
 
-#Calculate the range for the Income variable
+#Calculate the range for the variable
 range <- moran.range(pest.listw)
 minRange <- range[1]
 maxRange <- range[2]
@@ -979,12 +969,47 @@ zPest <- (mIPest - eIPest) / (sqrt(varPest))
 
 print(zPest)
 
+# Create a table to display Global Moran's I results
+results_table <- data.frame(
+  Variable = c("Residuals"),
+  Moran_I = c(mIPest),
+  Expected_I = c(eIPest),
+  Variance = c(varPest),
+  Z_Score = c(zPest)
+)
+
+# Print the table
+print(results_table)
+
+# Create table to display the values
+moransitable <- tableGrob(results_table, rows = c("")) #make a table "Graphical Object" (GrOb) 
+moransiCaption <- textGrob("Moran's I Results Table", gp = gpar(fontsize = 09))
+padding <- unit(5, "mm")
+
+moransitable <- gtable_add_rows(moransitable, 
+                            heights = grobHeight(moransiCaption) + padding, 
+                            pos = 0)
+
+moransitable <- gtable_add_grob(moransitable,
+                            moransiCaption, t = 1, l = 2, r = ncol(results_table) + 1)
+
+grid.arrange(moransitable, newpage = TRUE)
+```
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/d26d8e5f-c1d2-49d1-ad87-137c4bd4524a" alt="Morans I Table" width="800" />
+</div>
+<p style="text-align: center;"><em> Figure 15: Moran's I Results Table</em></p>
+
+The Moran's I results indicate a significant positive spatial autocorrelation in the residuals from the OLS regression model. The observed Moran's I value of 0.608 is much higher than the expected value of approximately -0.0006, which would occur if the pattern was random. The high Z-score of 100.42 shows that this level of spatial clustering is highly significant. This means that even after accounting for temperature in the regression model, the residuals show a strong spatial pattern, indicating that other factors may influence forest pest infestation events and winter temperature is not the only reason.
+
+Next, we can move onto the Local Moran's I and create a map to visualize the spatial autocorrelation.
+```{r LocalMoransI, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Local spatial autocorrelation
 
 # Calculate LISA test
 lisa.testPest <- localmoran(final_data_sf$residuals, pest.listw)
 
-#Extract LISA test results for Income
+#Extract LISA test results
 final_data_sf$Ii <- lisa.testPest[,1]
 final_data_sf$E.Ii<- lisa.testPest[,2]
 final_data_sf$Var.Ii<- lisa.testPest[,3]
@@ -1008,8 +1033,14 @@ map_LISA_Pest <- tm_shape(final_data_sf) +
 map_LISA_Pest
 
 tmap_save(map_LISA_Pest, "./Output/LocalMoransI.png", width = 10, height = 8, dpi = 300)
+```
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/cfbd51ca-49c2-4b0f-b008-ed06a81cd4e4" alt="Local Morans I Map" width="800" />
+</div>
+<p style="text-align: center;"><em> Figure 16: Local Moran's I Map</em></p>
 
-#Create Moran's I scatter plot for Income
+```{r MoransIScatterplot, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
+#Create Moran's I scatter plot
 moran.plot(final_data_sf$residuals, pest.listw, zero.policy=TRUE, spChk=NULL, labels=NULL, xlab="Pest Infestation Residuals", 
            ylab="Spatially Lagged Pest Infestation Residuals", quiet=NULL)
 ```
