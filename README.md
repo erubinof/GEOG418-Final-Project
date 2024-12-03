@@ -775,8 +775,10 @@ ggsave("./Output/Pest_Infestation_DensityMap.png", width = 10, height = 8, dpi =
 <div style="display: flex;">
   <img src="https://github.com/user-attachments/assets/e71278ae-8ad7-4902-8200-35a4077188b2" alt="Pest Density Map" width="800" />
 </div>
-<p style="text-align: center;"><em> Figure 10: Map of Pest Infestation Event Density Across BC in 2022</em></p>
+<p style="text-align: center;"><em> Figure 10: Map of Forest Pest Infestation Event Density Across BC in 2022</em></p>
+As you can see in the resulting map above, there are a couple clusters in the middle of the province. It also shows that the overall pattern of disturbance is mostly in the southern half.
 
+There are also other ways to display this data on a map. One way, shown below, is with points coloured by density.
 ```{r MapPestDensityPoint, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Convert the raster to a data frame
 density_df <- as.data.frame(density_raster, xy = TRUE)
@@ -806,7 +808,14 @@ ggplot() +
        y = "Latitude")
 
 ggsave("./Output/Pest_DensityPointMap.png", width = 10, height = 8, dpi = 300)
+```
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/65a73ef8-82b5-4dfa-8ac5-6f07ef7f9ff0" alt="Pest Density Point Map" width="800" />
+</div>
+<p style="text-align: center;"><em> Figure 11: Map of Forest Pest Infestation Event Density Points Across BC in 2022</em></p>
 
+The last method of mapping the density of the pest infestation events is to clip the data to the BC boundary and display the lines of the raster. This makes the map more readable and presentable. In this section of data, we will also combine the temperature data from the IDW interpolation and the pest infestation data into one dataset. 
+```{r MapPestDensityClipped, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Perform the spatial join
 joined_data <- st_join(idw_clipped, density_sf, join = st_intersects)
 
@@ -831,6 +840,16 @@ ggplot(data = final_data) +
   ) +
   theme(legend.position = "right")
 
+ggsave("./Output/Pest_DensityFinalMap.png", width = 10, height = 8, dpi = 300)
+```
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/8dcc9d56-f6ed-4005-9877-34fee66bcf30" alt="Pest Density Final Map" width="800" />
+</div>
+<p style="text-align: center;"><em> Figure 12: Clipped Map of Forest Pest Infestation Event Density Across BC in 2022</em></p>
+
+Now that we can create a presentable density map, we can also apply it to the temperature data for visualization. 
+## Mapping Temperature Density
+```{r MapTempClipped, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # For temperature, if adding a second scale for temperature:
 ggplot(data = final_data) +
   geom_sf(aes(fill = temperature)) +
@@ -842,6 +861,8 @@ ggplot(data = final_data) +
   ) +
   theme(legend.position = "right")
 
+ggsave("./Output/TemperatureDensityMap.png", width = 10, height = 8, dpi = 300)
+
 # Save final_data as a shapefile
 st_write(final_data, "./Output/final_data.shp", driver = "ESRI Shapefile", delete_dsn = TRUE)
 
@@ -851,9 +872,16 @@ final_data_df <- st_drop_geometry(final_data)
 # Write as CSV
 write.csv(final_data_df, "./Output/final_data.csv", row.names = FALSE)
 ```
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/8b56b250-fa77-4f7f-afb5-befcd04ec348" alt="Temperature Raster Map" width="800" />
+</div>
+<p style="text-align: center;"><em> Figure 13: Map of Predicted Average Temperature Across BC from November 2021 to March 2022</em></p>
 
+Now we have the raster data that has values for both forest pest infestation events in 2022 and predicted temperature for the winter beforehand. Using this data, we can look into if there is an association between the two. 
 # Ordinary Least Squares Regression
+Ordinary Least Squares (OLS) regression is a statistical method used to examine the relationship between one dependent variable and one or more independent variables. It does this by finding the line that minimizes the sum of the squared differences between the observed values and the values predicted by the model. In this case, we will use OLS regression to explore whether there is a relationship between the predicted average temperature for winter 2021/2022 and forest pest infestations in 2022. By fitting a regression model, we can assess how well temperature may explain variations in pest infestations and determine whether temperature acts as a significant predictor in this context.
 
+The following code will calculate the residuals from the model and visualize the residuals on a map. This process will help us understand how well the predicted winter temperatures explain the variation in forest pest infestations. By calculating and visualizing the residuals, we can identify any patterns that are not accounted for by the temperature data. If significant spatial patterns remain in the residuals, it suggests that other factors beyond temperature may be influencing forest pest infestations.
 ```{r OLSRegression, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Read the shapefile
 final_data_sf <- st_read("./Output/final_data.shp")
