@@ -2,10 +2,10 @@ GEOG 418 Final Project
 # An Analysis on Winter Temperature's Impact on Forest Pest Infestation in BC: R Coding Tutorial
 Created by: Ezra Rubinoff
 ## Introduction
-From 2010-2020 in British Columbia, forest pests impacted 6,793,100 hectares a year on average (National Forestry Database). That is equal to about 11% of all forest land in BC! In the context of climate change, trees are a key factor in balancing the carbon in our atmosphere through carbon sequestration. As they grow, they absorb CO2, a greenhouse gas that is stored in the biomass of the tree, and only release it when the tree burns or decays. Insect damage directly leads to the decay of trees, and indirectly to increased CO2 in the atmosphere and therefore climate change (Forest Carbon, 2013). Exploring how temperature can impact these pests is important as we look to slow carbon emissions and manage our climate. Recent studies have shown that severe cold events can reduce the size of forest pest outbreaks, limiting their ability to cause tree decay (MacQuarrie et al., 2024). They also explain that the intensity of winter weather conditions can limit both the range and impact of those pests, preventing them from distributing and impacting more forests(MacQuarrie et al., 2024). In a study focused on BC's forest pests, researchers explain that increased winter temperatures is a climate change prediction with a high degree of confidence (Woods, 2011). The concern these researchers show is due to the Mountain Pine Beetles' (MPB) vulnerability to cold winter temperatures, so with the projected increases, the MPB epidemic that is occuring could get worse (Woods, 2011). This not only shows that there is a strong connection between forest pests and winter temperature, but also that a dangerous feedback loop could emerge from more tree decay causing increased CO2 in the atmosphere and therefore higher winter temperatures and more pest disturbance.
+From 2010-2020 in British Columbia, forest pests impacted 6,793,100 hectares a year on average (National Forestry Database). That is equal to about 11% of all forest land in BC! In the context of climate change, trees are a key factor in balancing the carbon in our atmosphere through carbon sequestration. As they grow, they absorb CO2, a greenhouse gas that is stored in the biomass of the tree, and only release it when the tree burns or decays. Insect damage directly leads to the decay of trees, and indirectly to increased CO2 in the atmosphere and therefore climate change (Forest Carbon, 2013). Exploring how temperature can impact these pests is important as we look to slow carbon emissions and manage our climate. Recent studies have shown that severe cold events can reduce the size of forest pest outbreaks, limiting their ability to cause tree decay (MacQuarrie et al., 2024). They also explain that the intensity of winter weather conditions can limit both the range and impact of those pests, preventing them from distributing and impacting more forests(MacQuarrie et al., 2024). In a study focused on BC's forest pests, researchers explain that increased winter temperatures is a climate change prediction with a high degree of confidence (Woods, 2011). The concern these researchers show is due to the Mountain Pine Beetles' (MPB) vulnerability to cold winter temperatures, so with the projected increases, the MPB epidemic that is occurring could get worse (Woods, 2011). This not only shows that there is a strong connection between forest pests and winter temperature, but also that a dangerous feedback loop could emerge from more tree decay causing increased CO2 in the atmosphere and therefore higher winter temperatures and more pest disturbance.
 
-This tutorial aims to show how analysis can be done using R to analyse if winter temperatures explain higher incidences of forest pest disturbance in the following summer in British Columbia. At the end, we will be able to answer these three questions:
-- What is the spatial distribution pattern of forest pest distrurbances in BC?
+This tutorial aims to show how analysis can be done using R to analyze if winter temperatures explain higher incidences of forest pest disturbance in the following summer in British Columbia. At the end, we will be able to answer these three questions:
+- What is the spatial distribution pattern of forest pest disturbances in BC?
 - What is the best method of interpolating average winter temperature data across BC?
 -	Do lower winter temperatures lead to lower incidences of forest pest infestation events in the following summer?
 
@@ -59,7 +59,7 @@ Once you have downloaded the data from this github page and placed it into the f
 The first step is to set your working directory to inform the code where to look for the data and where to save your data and figures to. This working directory needs to be set for the project once, and everything from now on will be pulled from or saved into that folder.
 
 ### Data Cleaning
-Once that is complete, we can begin to bring in the data and save it in a format that will be usable. As this climate data was downloaded as individual station csv files from PCIC, we have to instruct the code to go into each one and extract the important temperature information. To get a more spatially diverse sampling of data, we had to collect it from multiple agencies with different ways of formatting the data. This means that in the cleaning process, we have to make sure all the different formats are accepted, and that all the outliers are taken out. To do this, the code only looks for the correct column for air temperature as defined by the subdirectory that the csv file is in. It also filters out any temperatures recorded between -50C and 60C, as that is the range of natural temperatures on the surface of the earth. Lastly, the code averages the data based on the date to make the final output an average temperature for November 2021 to March 2022 for each of the climate stations. The result of this code is a CSV that contains a value for temperature for each of the stations.
+Once that is complete, we can begin to bring in the data and save it in a format that will be usable. As this climate data was downloaded as individual station CSV files from PCIC, we have to instruct the code to go into each one and extract the important temperature information. To get a more spatially diverse sampling of data, we had to collect it from multiple agencies with different ways of formatting the data. This means that in the cleaning process, we have to make sure all the different formats are accepted, and that all the outliers are taken out. To do this, the code only looks for the correct column for air temperature as defined by the subdirectory that the CSV file is in. It also filters out any temperatures recorded between -50C and 60C, as that is the range of natural temperatures on the surface of the earth. Lastly, the code averages the data based on the date to make the final output an average temperature for November 2021 to March 2022 for each of the climate stations. The result of this code is a CSV that contains a value for temperature for each of the stations.
 ```{r CleanData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Set working directory
 dir <- "Path/to/your/project/folder"
@@ -70,11 +70,11 @@ empty_data <- data.frame(Native.ID = character(), TEMP = numeric(),
                          Longitude = numeric(), Latitude = numeric(), stringsAsFactors = FALSE)
 
 # Define the CSV file path for output
-csv_file_name <- "./Data/BC_AVG_TEMP.csv"
+CSV_file_name <- "./Data/BC_AVG_TEMP.CSV"
 
 # Write the empty data frame to a CSV file if it doesn't exist
-if (!file.exists(csv_file_name)) {
-  write.csv(empty_data, file = csv_file_name, row.names = FALSE)
+if (!file.exists(CSV_file_name)) {
+  write.CSV(empty_data, file = CSV_file_name, row.names = FALSE)
 }
 
 # Base directory for the data
@@ -90,14 +90,14 @@ for (subdir in subdirectories) {
   full_path <- file.path(base_dir, subdir)
   
   # List all CSV files in the specified subdirectory
-  csv_files <- list.files(path = full_path, pattern = "\\.csv$", full.names = TRUE)
+  CSV_files <- list.files(path = full_path, pattern = "\\.CSV$", full.names = TRUE)
   
   # Loop through each CSV file in the current subdirectory
-  for (file in csv_files) {
+  for (file in CSV_files) {
     cat("Processing file:", file, "\n")  # Print the file being processed
     
     # Read each file, adjusting the format as necessary
-    hourly_data <- read.csv(file, skip = 1, header = TRUE)
+    hourly_data <- read.CSV(file, skip = 1, header = TRUE)
     
     # Check if the time column exists
     if (!"time" %in% colnames(hourly_data)) {
@@ -151,7 +151,7 @@ for (subdir in subdirectories) {
     file_name_no_ext <- tools::file_path_sans_ext(basename(file))
     
     # Read the existing CSV file to append results
-    data <- read.csv(csv_file_name)
+    data <- read.CSV(CSV_file_name)
     
     # Check if any valid temperature data exists for the period
     if (nrow(avg_temp_nov_mar) > 0 && !is.na(avg_temp_nov_mar$avg_temp)) {
@@ -175,16 +175,16 @@ for (subdir in subdirectories) {
     data <- bind_rows(data, new_values)
     
     # Save the updated data frame back to the CSV file
-    write.csv(data, file = csv_file_name, row.names = FALSE)
+    write.CSV(data, file = CSV_file_name, row.names = FALSE)
   }
 }
 ```
 ### Merging the Climate Data
-Now that the climate data has been cleaned, we must turn the CSV with a temperature value and name of a station into spatial data. We can do this using the metadata we downloaded alongside the climate data. This metadata contains the location information for each of the stations with their IDs, which will allow us to link these two datasets together. This section of code outputs a csv with the temperature data and the latitude and longitude coordinates of each of the stations. 
+Now that the climate data has been cleaned, we must turn the CSV with a temperature value and name of a station into spatial data. We can do this using the metadata we downloaded alongside the climate data. This metadata contains the location information for each of the stations with their IDs, which will allow us to link these two datasets together. This section of code outputs a CSV with the temperature data and the latitude and longitude coordinates of each of the stations. 
 ```{r MergeClimateData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 #Merge the climate data for each station with the location data found in the metadata file
-metadata <- read.csv("./Data/station-metadata-by-history.csv")
-climatedata <- read.csv("./Data/BC_AVG_TEMP.csv")
+metadata <- read.CSV("./Data/station-metadata-by-history.CSV")
+climatedata <- read.CSV("./Data/BC_AVG_TEMP.CSV")
 
 merged_data <- merge(metadata, climatedata, by = "Native.ID")
 
@@ -201,14 +201,14 @@ merged_data <- na.omit(merged_data)
 merged_data <- merged_data[merged_data$TEMP <= 100, ]
 
 #Write the dataset so that it  is stored
-write.csv(merged_data, file = "./Data/ClimateData.csv", row.names = FALSE)
+write.CSV(merged_data, file = "./Data/ClimateData.CSV", row.names = FALSE)
 ```
 ### Mapping the Climate Data
 This next step is visualizing the data so we can interpret it. To do this, we will first create a shapefile of the data so it can be used later. Then, using the ggplot library, we will make a map with a descriptive title and informative legend.
 ```{r MapClimateData, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Ensure Latitude and Longitude columns are correctly formatted
 # Assuming the columns are named "Latitude" and "Longitude"
-climate_data <- read.csv("./Data/ClimateData.csv")
+climate_data <- read.CSV("./Data/ClimateData.CSV")
 climate_data <- climate_data %>%
   mutate(Latitude = as.numeric(Latitude),
          Longitude = as.numeric(Longitude))
@@ -251,14 +251,14 @@ ggplot() +
 </div>
 <p style="text-align: center;"><em>Figure 1: Map of 2021-2022 average winter temperature in BC for each of the climate stations used</em></p>
 
-You can see a pattern start to emerge here as the coastal and southern areas appear to have warmer winters that the northern areas. It is also important to note that the distribution of climate stations are not even and some areas are more sampled then others. This means some of the less accessible areas will not have values. 
+You can see a pattern start to emerge here as the coastal and southern areas appear to have warmer winters that the northern areas. It is also important to note that the distribution of climate stations are not even and some areas are more sampled than others. This means some of the less accessible areas will not have values. 
 ### Climate Data Interpolation
 As we want to use this climate data to analyze our patterns of forest pest disturbance, points could cause a problem because not all of the pest disturbance events will land on an area with a climate station. For that reason, we will need to interpolate a surface to try and estimate the average temperature for all of BC. Interpolation is the process of turning a point dataset into a raster dataset, where each pixel of the study area has a value associated with it. These values are determined based on the method of interpolation. There are two methods that we will use for this, the first is Inverse Distance Weighting (IDW), and the second is Kriging. Both have their benefits and drawbacks so we will go through them to determine which will be best for this analysis.
 
 #### Inverse Distance Weighting (IDW)
 The first interpolation method we will try is Inverse Distance Weighting or IDW. IDW is a spatial interpolation technique that estimates values at unsampled locations based on a weighted average of nearby known values. The main idea of IDW is that the closer a sample point is to the prediction location, the more influence it has on the predicted value. The power value in IDW is an important factor that influences the smoothness of the interpolated surface. It determines the rate at which the weight of a sample point decreases when increasing distance from the prediction location. Lower power values, like 1 or 2, result in smoother interpolated surfaces, as the influence of further points is higher. This can be useful when the underlying spatial process is believed to be smooth and continuous. Higher power values, like 3 or 4, lead to more localized and detailed interpolated surfaces, as the influence of distant points is decreased. This can be appropriate when the spatial process is contains rapid variations or local trends.
 
-For this application, there are 2 parameters to enter. The first is the grid size for the output. A higher grid size would lead to a smoother surface and less computational power required, but it could miss important features that a finer grid could catch. In this case, we selected a cellsize of 25,000 to try and find a balance between both. The other parameter is the power value (idp), which we have selected 2 as the temperature should be smooth not have too many local trends acorss BC. Once this has all been set, we can run the interpolation and output a map of the result. To make the map more readable, we also have clipped it to the boundary of BC.
+For this application, there are 2 parameters to enter. The first is the grid size for the output. A higher grid size would lead to a smoother surface and less computational power required, but it could miss important features that a finer grid could catch. In this case, we selected a cell size of 25,000 to try and find a balance between both. The other parameter is the power value (idp), which we have selected 2 as the temperature should be smooth not have too many local trends across BC. Once this has all been set, we can run the interpolation and output a map of the result. To make the map more readable, we also have clipped it to the boundary of BC.
 ```{r IDWInterpolation, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Read the shapefile
 climate_shp <- st_read("./Output/ClimateData.shp")
@@ -343,7 +343,7 @@ This shows one method of interpolation that creates a surface with each pixel re
 #### Kriging
 The second interpolation method we will use is Kriging. Kriging is a spatial interpolation technique that predicts values at unsampled locations based on the spatial autocorrelation of the known data points. Unlike IDW, which relies on distance-based weights, Kriging incorporates a statistical model of the spatial relationships between points, represented by a semivariogram. The semivariogram is a key component in Kriging, as it describes how the variance between values changes with distance, allowing the interpolation to account for both the strength and range of spatial dependency. This makes Kriging strong for capturing complex spatial patterns. Kriging is often considered a global interpolation method because it uses data from the entire dataset, rather than focusing only on nearby points, to predict values. This global approach can provide more accurate results when there are clear spatial trends or when the data exhibits consistent patterns over larger areas.
 
-We will now walk through a process to prepare for the Kriging interpolation using our climate data. First we define the model formula as TEMP ~ 1, which tells the Kriging algorithm to predict the temperature across the study area without including any additional predictors. Then, we create the semivariogram using our climate data. This step involves analyzing how the temperature values vary with distance between data points. We can fit a spherical semivariogram model ("Sph") with the following parameters: a nugget of 8, a sill of 40 , and a range of 600,000. After fitting the model, we’ll visualize it with a plot to confirm the fit.
+We will now walk through a process to prepare for the Kriging interpolation using our climate data. First we define the model formula as TEMP ~ 1, which tells the Kriging algorithm to predict the temperature across the study area without including any additional predictors. Then, we create the semivariogram using our climate data. This step involves analyzing how the temperature values vary with distance between data points. We can fit a spherical semivariogram model ("Sph") with the following parameters: a nugget of 8, a sill of 40, and a range of 600,000. After fitting the model, we’ll visualize it with a plot to confirm the fit.
 
 ```{r KrigingSemivariance, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 f.0 <- as.formula(TEMP ~ 1) 
@@ -422,7 +422,7 @@ tmap_save(kriging_map, filename = "./Output/Kriging_map.png", width = 10, height
 </div>
 <p style="text-align: center;"><em>Figure 4: Map of interpolated climate data across BC for November 2021-March 2022 using Kriging</em></p>
 
-Now we have interpolated with both IDW and Kriging, we can see some of of their benefits and drawbacks. For this data, the best option to continue on with is IDW, as it seems to handle the unevenly distributed data much better than Kriging. In the Kriging map above, it is clear that the areas with more samples sees the most differences and IDW is able to capture some of the more localized trends in the interior of the province.
+Now we have interpolated with both IDW and Kriging, we can see some of their benefits and drawbacks. For this data, the best option to continue on with is IDW, as it seems to handle the unevenly distributed data much better than Kriging. In the Kriging map above, it is clear that the areas with more samples sees the most differences and IDW is able to capture some of the more localized trends in the interior of the province.
 ## Forest Pest Disturbance Events
 Moving along from the climate data, we can begin to prepare and understand our forest pest disturbance event data that we will need to conduct our analysis. This data was downloaded from the BC Data Catalogue. Each point contains the year of survey, forest health factor (disturbance agent), severity class, area, numbers of trees estimated in the spot, and host (BC Data Catalogue, 2023). For this project, we will filter the data to only use points that mark the year as 2022.
 
@@ -460,7 +460,7 @@ normality <- round(norm_numtrees_PVAL, 5)
 data.for.table1 = data.frame(mean, sd, median, mode)
 data.for.table2 = data.frame(skewness, kurtosis, CoV, normality)
 outCSV <- data.frame(mean, sd, median, mode, skewness, kurtosis, CoV, normality)
-write.csv(outCSV, "./Output/PestDescriptiveStats_2022.csv", row.names = FALSE)
+write.CSV(outCSV, "./Output/PestDescriptiveStats_2022.CSV", row.names = FALSE)
 
 table1 <- tableGrob(data.for.table1, rows = c("")) #make a table "Graphical Object" (GrOb) 
 t1Caption <- textGrob("Table 1: Descriptive Statistics for Number of \nTrees impacted by Pest Infestations \nin BC in 2022", gp = gpar(fontsize = 09))
@@ -558,9 +558,9 @@ When analyzing spatial point patterns, we often consider first-order and second-
 Second-order variability, on the other hand, focuses on the spatial relationships between points themselves. This is about how the location of one point might influence the location of others nearby. For instance, on a beach, ice cream stands might cluster together because their owners want to take advantage of popular spots or create competition. 
 
 #### Nearest Neighbour Analysis
-For our analysis we will conduct three different types of point pattern analysis, Nearest Neighbour, Quadrat, and K-Function. Starting off, Nearest Neighbour Analysis is a statistical method used to evaluate spatial distribution by measuring the distance between each point and its nearest neighbor. These distances are then summed and divided by the total number of points to calculate the average nearest neighbor distance, also known as the mean NND. 
+For our analysis we will conduct three different types of point pattern analysis, Nearest Neighbour, Quadrat, and K-Function. Starting off, Nearest Neighbour Analysis is a statistical method used to evaluate spatial distribution by measuring the distance between each point and its nearest neighbour. These distances are then summed and divided by the total number of points to calculate the average nearest neighbour distance, also known as the mean NND. 
 
-By calculating distances between each point and its closest neighbor, it tests whether the pattern of infestation events are random, clustered, or regularly spaced. The results will provide a statistical summary, including the average nearest neighbor distance and a Z-score, to determine the significance of the observed pattern. Nearest neighbor analysis is primarily a second-order measure as it evaluates the spatial relationships between points by examining the distances to their closest neighbors.
+By calculating distances between each point and its closest neighbour, it tests whether the pattern of infestation events are random, clustered, or regularly spaced. The results will provide a statistical summary, including the average nearest neighbour distance and a Z-score, to determine the significance of the observed pattern. Nearest neighbour analysis is primarily a second-order measure as it evaluates the spatial relationships between points by examining the distances to their closest neighbours.
 ```{r NearestNeighbourAnalysis, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 ### Nearest Neighbour Analysis
 
@@ -583,13 +583,13 @@ pests.ppp <- ppp(
 #Conduct Nearest Neighbour Analysis
 nearestNeighbour <- nndist(pests.ppp)
 
-##Convert the nearestNeighbor object into a dataframe.
+##Convert the nearestNeighbour object into a dataframe.
 nearestNeighbour=as.data.frame(as.numeric(nearestNeighbour))
 
 ##Change the column name to "Distance"
 colnames(nearestNeighbour) = "Distance"
 
-##Calculate the nearest neighbor statistic to test for a random spatial distribution.
+##Calculate the nearest neighbour statistic to test for a random spatial distribution.
 
 #First calculate the mean nearest neighbour
 nnd = sum(nearestNeighbour$Distance)/nrow(nearestNeighbour)
@@ -646,7 +646,7 @@ By calculating a variance-to-mean ratio (VMR), quadrat analysis provides insight
 
 This approach is useful for examining large-scale patterns but has limitations, including sensitivity to the size of the quadrats and the inability to capture finer details about point locations within each cell. Quadrat analysis focuses on first-order variability, as it is influenced by underlying landscape factors that affect point density. 
 
-For this analysis, we have selected 12 as the value for quads, which means there will be 12x12 or 144 quadrats defining our study area. 144 was selected to get a good amount of coverage across the province without having too many cells and increacing the computational requirements.
+For this analysis, we have selected 12 as the value for quads, which means there will be 12x12 or 144 quadrats defining our study area. 144 was selected to get a good amount of coverage across the province without having too many cells and increasing the computational requirements.
 ```{r QuadratAnalysis, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 ##Quadrat Analysis
 ##First, determine the number of quadrats. You need to specify a number that makes sense given the number of points and the size of the study area. Note that quads equals the number of rows or columns in your quads dataset, therefore the actual number is quads^2 
@@ -738,7 +738,7 @@ The K-function plot shows that at smaller distances, the observed point pattern 
 Overall, the results from these three point pattern analyses indicate that the points are clustered rather than randomly distributed. Both the Nearest Neighbour and Quadrat Analyses suggest clustering, and the K-function analysis supports this by showing that the observed distribution deviates from the expected random pattern as the distance increases. These findings highlight a clear pattern of clustering across all three methods. 
 
 ### Mapping the Forest Pest Disturbance Density
-Now that we have determined the spatial distribution of points, we can move on to creating a density map of the events. This will provide us with a visual aid to understand the patterns of the events across BC. The only parameter needed for this section is the resolution of the final output. In an effort to be consistant across this project, we will match the resolution of 25,000 that we used in IDW and Kriging.
+Now that we have determined the spatial distribution of points, we can move on to creating a density map of the events. This will provide us with a visual aid to understand the patterns of the events across BC. The only parameter needed for this section is the resolution of the final output. In an effort to be consistent across this project, we will match the resolution of 25,000 that we used in IDW and Kriging.
 ```{r MapPestDensity, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Ensure bbox2 is valid and formatted correctly
 bbox2 <- st_bbox(bc_boundary)
@@ -817,7 +817,7 @@ ggsave("./Output/Pest_DensityPointMap.png", width = 10, height = 8, dpi = 300)
 </div>
 <p style="text-align: center;"><em> Figure 11: Map of Forest Pest Infestation Event Density Points Across BC in 2022</em></p>
 
-The last method of mapping the density of the pest infestation events is to clip the data to the BC boundary and display the lines of the raster. This makes the map more readable and presentable. In this section of data, we will also combine the temperature data from the IDW interpolation and the pest infestation data into one dataset. 
+The last method of mapping the density of the pest infestation events is to clip the data to the BC boundary and display the lines of the raster. This makes the map more readable and presentable. In this section of data, we will also combine the winter temperature data from the IDW interpolation and the forest pest infestation data into one dataset. 
 ```{r MapPestDensityClipped, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Perform the spatial join
 joined_data <- st_join(idw_clipped, density_sf, join = st_intersects)
@@ -873,7 +873,7 @@ st_write(final_data, "./Output/final_data.shp", driver = "ESRI Shapefile", delet
 final_data_df <- st_drop_geometry(final_data)
 
 # Write as CSV
-write.csv(final_data_df, "./Output/final_data.csv", row.names = FALSE)
+write.CSV(final_data_df, "./Output/final_data.CSV", row.names = FALSE)
 ```
 <div style="display: flex;">
   <img src="https://github.com/user-attachments/assets/8b56b250-fa77-4f7f-afb5-befcd04ec348" alt="Temperature Raster Map" width="800" />
@@ -924,9 +924,9 @@ The residuals map shows significant variability in the difference between observ
 ### Spatial Autocorrelation of OLS Residuals
 After analyzing the residuals from the Ordinary Least Squares (OLS) regression, we can now investigate whether spatial autocorrelation plays a role in the distribution of pest infestations.
 
-Spatial autocorrelation refers to the degree to which a variable at one location is related to the values of the same variable at nearby locations. It helps identify patterns of spatial dependence, where observations that are closer in space, exhibit similar values, or obervations further away show dissimilar values. Positive spatial autocorrelation indicates clustering of similar values, while negative autocorrelation suggests dispersion or the presence of opposing values in close proximity. No autocorrelation means there is a random distribution of values.
+Spatial autocorrelation refers to the degree to which a variable at one location is related to the values of the same variable at nearby locations. It helps identify patterns of spatial dependence, where observations that are closer in space, exhibit similar values, or observations further away show dissimilar values. Positive spatial autocorrelation indicates clustering of similar values, while negative autocorrelation suggests dispersion or the presence of opposing values in close proximity. No autocorrelation means there is a random distribution of values.
 
-This next section of code uses the concept of spatial autocorrelation to examine the relationship between residuals of the pest infestation model and their spatial arrangement. We first create a neighborhood matrix using Inverse Distance Weighting, where the proximity of each observation to its neighbors is taken into account and further neighbours have less weight in the matrix. Using this matrix, we then compute Global Moran's I, which helps identify whether there is significant spatial clustering of the residuals. A positive Global Moran's I suggests clustering, while a negative value indicates dispersion. Additionally, we conduct a Local Moran's I or Local Indicators of Spatial Association (LISA) test to identify localized areas where this clustering is most pronounced. The results of these analyses are displayed in maps and scatter plots to provide a clearer understanding of the spatial patterns present in the data. This aligns with previous studies, such as those by MacQuarrie et al. (2024) and Woods (2011), which highlight the role of climate in influencing pest outbreaks, and the need for continued research on these relationships.
+This next section of code uses the concept of spatial autocorrelation to examine the relationship between residuals of the pest infestation model and their spatial arrangement. We first create a neighbourhood matrix using Inverse Distance Weighting, where the proximity of each observation to its neighbours is taken into account and further neighbours have less weight in the matrix. Using this matrix, we then compute Global Moran's I, which helps identify whether there is significant spatial clustering of the residuals. A positive Global Moran's I suggests clustering, while a negative value indicates dispersion. Additionally, we conduct a Local Moran's I or Local Indicators of Spatial Association (LISA) test to identify localized areas where this clustering is most pronounced. The results of these analyses are displayed in maps and scatter plots to provide a clearer understanding of the spatial patterns present in the data. 
 
 #### Moran's I
 ```{r MoransI, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
@@ -940,7 +940,7 @@ final_data_centroids <- st_centroid(final_data_sf)
 # Extract coordinates
 final_data_coords <- st_coordinates(final_data_centroids)
 
-# Create neighbor object based on distances
+# Create neighbour object based on distances
 pest.nb <- dnearneigh(final_data_coords, d1 = 0, d2 = max_distance)
 
 # Convert to a listw object with inverse distance weights
@@ -1044,7 +1044,7 @@ tmap_save(map_LISA_Pest, "./Output/LocalMoransI.png", width = 10, height = 8, dp
 </div>
 <p style="text-align: center;"><em> Figure 16: Local Moran's I Map</em></p>
 
-This map displays the local spatial autocorrelation of the residuals from the OLS regression, highlighting areas where the model over or underpredicts forest pest infestation events. The green areas represent statistically significant clusters of high residuals, indicating regions where the model underpredicts forest pest infestations. The pink squares indicate significant clusters of low residuals , where the model overpredicts pest infestations. Lastly, the grey areas are where there is no statistically significant local spatial autocorrelation of the residuals, meaning the OLS model's predictions are more consistent with observed values in these areas. Together, these patterns underline the uneven performance of the model across the study area.
+This map displays the local spatial autocorrelation of the residuals from the OLS regression, highlighting areas where the model over or under predicts forest pest infestation events. The green areas represent statistically significant clusters of high residuals, indicating regions where the model under predicts forest pest infestations. The pink squares indicate significant clusters of low residuals, where the model over predicts pest infestations. Lastly, the grey areas are where there is no statistically significant local spatial autocorrelation of the residuals, meaning the OLS model's predictions are more consistent with observed values in these areas. Together, these patterns underline the uneven performance of the model across the study area.
 
 #### Moran's I Scatterplot
 The last step of using spatial autocorrelation for this analysis is making a Moran's I scatterplot. This will examine the relationship between the residuals of the regression model and their spatially lagged values. The scatterplot helps identify spatial patterns in the residuals, such as clustering or dispersion, and provides insight into whether the model has accounted for spatial dependencies in the data. By visualizing the spatial autocorrelation, we can further investigate the adequacy of the regression model and the extent of spatial dependence in the pest infestation residuals.
@@ -1062,7 +1062,7 @@ The scatterplot shows a high amount of points in the lower left quadrant. This s
 ## Geographic Weighted Regression
 The last method of analysis we will conduct is Geographic Weighted Regression (GWR). GWR is a method used to understand how the relationship between variables changes across different areas. Unlike traditional regression models that assume the relationship is the same everywhere, GWR allows for local variations in the relationship. This method is helpful when studying how one variable, like forest pest infestation, is influenced by another variable, like temperature, across different locations. In this analysis, GWR will show how forest pest infestation and winter temperature are related in different parts of the study area.
 
-The code begins by preparing the data for analysis. It then creates a neighborhood structure, making sure that each area has neighboring regions. The GWR model is then run with a fixed bandwidth of 200 km, and the results are visualized on a map. The map shows the local relationships between forest pest infestation and winter temperature, where the color of the dots indicates the strength of this relationship in each area.
+The code begins by preparing the data for analysis. It then creates a neighbourhood structure, making sure that each area has neighbouring regions. The GWR model is then run with a fixed bandwidth of 200 km, and the results are visualized on a map. The map shows the local relationships between forest pest infestation and winter temperature, where the colour of the dots indicates the strength of this relationship in each area.
 
 ```{r GWRRegression, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Preview the data to check variable names and content
@@ -1072,15 +1072,15 @@ print(colnames(final_data_sf))
 # Convert the sf object to Spatial object
 final_data_sp <- as_Spatial(final_data_sf)
 
-# Create neighborhood structure
-neighbors <- poly2nb(final_data_sp, queen = TRUE)
+# Create neighbourhood structure
+neighbours <- poly2nb(final_data_sp, queen = TRUE)
 
-# Check neighbors for any issues
-print(summary(neighbors))
+# Check neighbours for any issues
+print(summary(neighbours))
 
-# Check for any empty neighbors
-if (any(sapply(neighbors, length) == 0)) {
-  warning("Some polygons have no neighbors. This may cause issues for GWR.")
+# Check for any empty neighbours
+if (any(sapply(neighbours, length) == 0)) {
+  warning("Some polygons have no neighbours. This may cause issues for GWR.")
 }
 
 # Prepare the dependent and independent variables
@@ -1155,15 +1155,15 @@ tmap_save(tm_gwr, "./Output/gwr_coefficients_fixed_bandwidth.png", width = 10, h
 </div>
 <p style="text-align: center;"><em> Figure 18: Geographic Weighted Regression Map</em></p>
 
-The GWR map shows how the relationship between forest pest infestation and winter temperature varies across different regions in the study area. Each point on the map represents a location where the GWR model has calculated a local relationship between pest infestation and temperature, based on nearby areas. The color of the points indicates the strength or magnitude of this relationship, with different colors representing higher or lower coefficients for the relationship.
+The GWR map shows how the relationship between forest pest infestation and winter temperature varies across different regions in the study area. Each point on the map represents a location where the GWR model has calculated a local relationship between pest infestation and temperature, based on nearby areas. The colour of the points indicates the strength or magnitude of this relationship, with different colours representing higher or lower coefficients for the relationship.
 
-The areas with brighter colors like yellow indicate a strong positive relationship between winter temperature and forest pest infestation, meaning that in these regions, higher temperatures are more strongly associated with higher levels of pest infestation. Darker colors like purple show areas where the relationship is weak or negative, indicating that temperature has less of an effect, or a reversed effect, on pest infestation in those regions.
+The areas with brighter colours like yellow indicate a strong positive relationship between winter temperature and forest pest infestation, meaning that in these regions, higher temperatures are more strongly associated with higher levels of pest infestation. Darker colours like purple show areas where the relationship is weak or negative, indicating that temperature has less of an effect, or a reversed effect, on pest infestation in those regions.
 ## Conclusion
 In this tutorial, we have gone through a comprehensive analysis of the relationship between winter temperatures and forest pest disturbance events in British Columbia, using a variety of spatial statistical methods. The process began with cleaning and mapping the climate data. This was followed by performing climate data interpolation to estimate temperature values across the study area. We applied both Inverse Distance Weighting (IDW) and Kriging as interpolation methods to assess which approach best captured the temperature variations across the region.
 
-Next, we moved to the analysis of forest pest disturbances. Descriptive statistics were used to summarize the pest disturbance data, followed by mapping these events and conducting point pattern analysis to explore spatial distributions. The Nearest Neighbor, Quadrat, and K-function analyses allowed us to assess the spatial arrangement of forest pest disturbances and identify the patterns of clustering that we see. This, along with mapping the density of forest pest disturbances and temperature, gave us a base that we could then build from to assess the relationship between the two datasets.
+Next, we moved to the analysis of forest pest disturbances. Descriptive statistics were used to summarize the pest disturbance data, followed by mapping these events and conducting point pattern analysis to explore spatial distributions. The Nearest Neighbour, Quadrat, and K-function analyses allowed us to assess the spatial arrangement of forest pest disturbances and identify the patterns of clustering that we see. This, along with mapping the density of forest pest disturbances and temperature, gave us a base that we could then build from to assess the relationship between the two datasets.
 
-We then explored the relationship between winter temperature and forest pest disturbance through regression analysis, first using Ordinary Least Squares (OLS) regression and then assessing spatial autocorrelation of the OLS residuals through Moran's I, Local Moran's I, and Moran's I scatterplots. These tests revealed spatial dependencies in the residuals, highlighting regions where pest disturbances were not well explained by temperature alone. Finally, we applied Geographic Weighted Regression (GWR) to account for spatial variation in the temperature-pest relationship, showing how temperature impacts forest pest disturbances differently across British Columbia. This all showed that winter temperature is not the greatest factor to look at when looking to understand where forest pest disturbance events may occur. It may be part of the story, but there are likely many more influences to these events that we did not take into consideration for this study. 
+We then explored the relationship between winter temperature and forest pest disturbance through regression analysis, first using Ordinary Least Squares (OLS) regression and then assessing spatial autocorrelation of the OLS residuals through Moran's I, Local Moran's I, and Moran's I scatterplots. These tests revealed spatial dependencies in the residuals, highlighting regions where pest disturbances were not well explained by temperature alone. Finally, we applied Geographic Weighted Regression (GWR) to account for spatial variation in the temperature-pest relationship, showing how temperature impacts forest pest disturbances differently across British Columbia. This all showed that winter temperature is not the greatest factor to look at when looking to understand where forest pest disturbance events may occur. It may be part of the story, but there are likely many more influences to these events that we did not take into consideration for this study. This aligns with previous studies, such as those by MacQuarrie et al. (2024) and Woods (2011), which highlight the role of climate in influencing pest outbreaks, and the need for continued research on these relationships.
 
 While this study offers valuable insights, there are limitations, such as the uneven distribution of weather stations, the exclusion of precipitation data, and the lack of species specific data. These limitations underline the need for further research to develop more understanding of the complex interactions between climate and forest pests. It is also important to acknowledge that our findings do still contribute to understanding the potential impacts of climate change on forest pest disturbances, which are important for managing forest health and mitigating the effects of climate change on carbon sequestration in British Columbia.
 ## References
