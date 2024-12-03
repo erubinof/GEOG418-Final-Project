@@ -925,6 +925,7 @@ Spatial autocorrelation refers to the degree to which a variable at one location
 
 This next section of code uses the concept of spatial autocorrelation to examine the relationship between residuals of the pest infestation model and their spatial arrangement. We first create a neighborhood matrix using Inverse Distance Weighting, where the proximity of each observation to its neighbors is taken into account and further neighbours have less weight in the matrix. Using this matrix, we then compute Global Moran's I, which helps identify whether there is significant spatial clustering of the residuals. A positive Global Moran's I suggests clustering, while a negative value indicates dispersion. Additionally, we conduct a Local Moran's I or Local Indicators of Spatial Association (LISA) test to identify localized areas where this clustering is most pronounced. The results of these analyses are displayed in maps and scatter plots to provide a clearer understanding of the spatial patterns present in the data.
 
+### Moran's I
 ```{r MoransI, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Making a neighbourhood matrix with Inverse Distance Weighting
 # Define a maximum distance threshold (e.g., 100 km)
@@ -1002,6 +1003,7 @@ grid.arrange(moransitable, newpage = TRUE)
 
 The Moran's I results indicate a significant positive spatial autocorrelation in the residuals from the OLS regression model. The observed Moran's I value of 0.608 is much higher than the expected value of approximately -0.0006, which would occur if the pattern was random. The high Z-score of 100.42 shows that this level of spatial clustering is highly significant. This means that even after accounting for temperature in the regression model, the residuals show a strong spatial pattern, indicating that other factors may influence forest pest infestation events and winter temperature is not the only reason.
 
+### Local Moran's I
 Next, we can move onto the Local Moran's I and create a map to visualize the spatial autocorrelation.
 ```{r LocalMoransI, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Local spatial autocorrelation
@@ -1039,12 +1041,25 @@ tmap_save(map_LISA_Pest, "./Output/LocalMoransI.png", width = 10, height = 8, dp
 </div>
 <p style="text-align: center;"><em> Figure 16: Local Moran's I Map</em></p>
 
+This map displays the local spatial autocorrelation of the residuals from the OLS regression, highlighting areas where the model over or underpredicts forest pest infestation events. The green areas represent statistically significant clusters of high residuals, indicating regions where the model underpredicts forest pest infestations. The pink squares indicate significant clusters of low residuals , where the model overpredicts pest infestations. Lastly, the grey areas are where there is no statistically significant local spatial autocorrelation of the residuals, meaning the OLS model's predictions are more consistent with observed values in these areas. Together, these patterns underline the uneven performance of the model across the study area.
+
+### Moran's I Scatterplot
+The last step of using spatial autocorrelation for this analysis is making a Moran's I scatterplot. This will examine the relationship between the residuals of the regression model and their spatially lagged values. The scatterplot helps identify spatial patterns in the residuals, such as clustering or dispersion, and provides insight into whether the model has accounted for spatial dependencies in the data. By visualizing the spatial autocorrelation, we can further investigate the adequacy of the regression model and the extent of spatial dependence in the pest infestation residuals.
 ```{r MoransIScatterplot, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 #Create Moran's I scatter plot
 moran.plot(final_data_sf$residuals, pest.listw, zero.policy=TRUE, spChk=NULL, labels=NULL, xlab="Pest Infestation Residuals", 
            ylab="Spatially Lagged Pest Infestation Residuals", quiet=NULL)
 ```
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/0bf1ef58-306c-4c62-9502-0ce32751142b" alt="Morans I Scatterplot" width="800" />
+</div>
+<p style="text-align: center;"><em> Figure 17: Moran's I Scatterplot</em></p>
+
+The scatterplot shows a high amount of points in the lower left quadrant. This suggests that forest pest infestations are spatially clustered in a way that regions with low pest infestation residuals (under-predicted infestation areas) tend to group together spatially.
 # Geographic Weighted Regression
+The last method of analysis we will conduct is Geographic Weighted Regression (GWR). GWR is a method used to understand how the relationship between variables changes across different areas. Unlike traditional regression models that assume the relationship is the same everywhere, GWR allows for local variations in the relationship. This method is helpful when studying how one variable, like forest pest infestation, is influenced by another variable, like temperature, across different locations. In this analysis, GWR will show how forest pest infestation and winter temperature are related in different parts of the study area.
+
+The code begins by preparing the data for analysis. It then creates a neighborhood structure, making sure that each area has neighboring regions. The GWR model is then run with a fixed bandwidth of 200 km, and the results are visualized on a map. The map shows the local relationships between forest pest infestation and winter temperature, where the color of the dots indicates the strength of this relationship in each area.
 
 ```{r GWRRegression, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Preview the data to check variable names and content
@@ -1129,9 +1144,23 @@ tm_gwr <- tm_shape(gwr_output_sf_fixed) +
   tm_compass(position = c("right", "bottom"), size = 1.5)
 tm_gwr
 
-# Optional: Save the plot
+#Save the plot
 tmap_save(tm_gwr, "./Output/gwr_coefficients_fixed_bandwidth.png", width = 10, height = 8, dpi = 300)
 ```
-# Conclusion
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/daa2ebec-e857-445b-87d8-4a5d97476622" alt="GWR Map" width="800" />
+</div>
+<p style="text-align: center;"><em> Figure 18: Geographic Weighted Regression Map</em></p>
 
+The GWR map shows how the relationship between forest pest infestation and winter temperature varies across different regions in the study area. Each point on the map represents a location where the GWR model has calculated a local relationship between pest infestation and temperature, based on nearby areas. The color of the points indicates the strength or magnitude of this relationship, with different colors representing higher or lower coefficients for the relationship.
+
+The areas with brighter colors like yellow indicate a strong positive relationship between winter temperature and forest pest infestation, meaning that in these regions, higher temperatures are more strongly associated with higher levels of pest infestation. Darker colors like purple show areas where the relationship is weak or negative, indicating that temperature has less of an effect, or a reversed effect, on pest infestation in those regions.
+# Conclusion
+In this study, we have explored how winter temperature influences the incidence of forest pest infestations in British Columbia, with a particular focus on how temperature might drive pest disturbances. The spatial distribution of forest pest infestations was analyzed using Moran's I and Local Indicators of Spatial Association (LISA) to reveal significant spatial patterns, showing a clear clustering of high and low pest infestation areas. The Moran's I analysis indicated a positive spatial autocorrelation, suggesting that areas with similar pest infestation levels are clustered together. The LISA test further identified clusters of high and low infestation regions, with areas of high pest infestations showing positive spatial autocorrelation. These findings suggest that temperature might play a role in shaping the spatial distribution of pest outbreaks.
+
+To further investigate the relationship between winter temperature and pest infestations, we employed Geographically Weighted Regression (GWR). This method showed spatial variability in how temperature influenced pest infestation levels, with stronger relationships between higher temperatures and pest outbreaks in some areas, while weaker or no significant relationships were observed in others. These results suggest that temperature could indeed be a key factor in determining pest infestation severity in specific regions, which aligns with previous research indicating that increased winter temperatures may exacerbate pest outbreaks, particularly for species like the Mountain Pine Beetle.
+
+However, this study has several limitations. First, the spatial distribution of weather stations is uneven across British Columbia, which could affect the accuracy and representativeness of the temperature data. Some areas may be underrepresented or lack temperature data altogether, limiting the ability to fully capture regional temperature trends. Additionally, this study only considered temperature as a factor influencing pest infestations, neglecting the potential role of precipitation, which could also significantly affect pest populations and their ability to thrive. Finally, different pest species may have varying sensitivities to temperature changes, so generalizing the results to all pests may not be entirely accurate. Each pest species may have unique thresholds for temperature tolerance, which could result in differing responses to climate change.
+
+In conclusion, while the findings suggest that temperature plays a significant role in shaping pest infestation patterns, further research considering other climate factors like precipitation and specific pest species dynamics is needed to better understand the complexities of pest outbreaks in the context of climate change. This research contributes to a growing body of knowledge on how environmental factors affect forest pest disturbances and their potential impacts on forest health and carbon sequestration in British Columbia.
 # References
