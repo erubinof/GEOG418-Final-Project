@@ -555,7 +555,7 @@ When analyzing spatial point patterns, we often consider first-order and second-
 Second-order variability, on the other hand, focuses on the spatial relationships between points themselves. This is about how the location of one point might influence the location of others nearby. For instance, on a beach, ice cream stands might cluster together because their owners want to take advantage of popular spots or create competition. 
 
 ## Nearest Neighbour Analysis
-For our analysis we will conduct two different types of point pattern analysis, Nearest Neighbour and Quadrat. Starting off, Nearest Neighbour Analysis is a statistical method used to evaluate spatial distribution by measuring the distance between each point and its nearest neighbor. These distances are then summed and divided by the total number of points to calculate the average nearest neighbor distance, also known as the mean NND. 
+For our analysis we will conduct three different types of point pattern analysis, Nearest Neighbour, Quadrat, and K-Function. Starting off, Nearest Neighbour Analysis is a statistical method used to evaluate spatial distribution by measuring the distance between each point and its nearest neighbor. These distances are then summed and divided by the total number of points to calculate the average nearest neighbor distance, also known as the mean NND. 
 
 By calculating distances between each point and its closest neighbor, it tests whether the pattern of infestation events are random, clustered, or regularly spaced. The results will provide a statistical summary, including the average nearest neighbor distance and a Z-score, to determine the significance of the observed pattern. Nearest neighbor analysis is primarily a second-order measure as it evaluates the spatial relationships between points by examining the distances to their closest neighbors.
 ```{r NearestNeighbourAnalysis, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
@@ -629,6 +629,12 @@ nndtable <- gtable_add_grob(nndtable,
 
 grid.arrange(nndtable, newpage = TRUE)
 ```
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/f69fff6d-5a80-46a5-b8d1-1a7c5e337b29" alt="NearestNeighbourTable" width="800" />
+</div>
+<p style="text-align: center;"><em> Figure 7: Nearest Neighbour Results Table</em></p>
+
+The results show that the points in the study area are clustered together, not spread out randomly or evenly. The average distance between points is much smaller than what would be expected if the points were placed randomly or evenly. The Z-score of -144.06 confirms that this clustering is very significant and not just due to chance. The ratio of 0.45 also supports this because it’s less than 1, meaning the points are much closer to each other than we’d expect in a random distribution.
 
 ## Quadrat Analysis
 Quadrat analysis is another method used to evaluate the spatial distribution of points, helping determine whether they are clustered, evenly spaced, or randomly distributed. It works by dividing the study area into a grid of equally sized quadrats and counting the number of points within each quadrat. The variation in these counts across the grid is then analyzed statistically to identify patterns in the distribution.
@@ -636,6 +642,8 @@ Quadrat analysis is another method used to evaluate the spatial distribution of 
 By calculating a variance-to-mean ratio (VMR), quadrat analysis provides insight into the overall spatial pattern. A VMR near 1 suggests a random distribution, a value larger than 1 indicates clustering, and a value less than 1 points to an even distribution. To assess the significance of these patterns, we use a statistical test called the chi-squared test.
 
 This approach is useful for examining large-scale patterns but has limitations, including sensitivity to the size of the quadrats and the inability to capture finer details about point locations within each cell. Quadrat analysis focuses on first-order variability, as it is influenced by underlying landscape factors that affect point density. 
+
+For this analysis, we have selected 12 as the value for quads, which means there will be 12x12 or 144 quadrats defining our study area. 144 was selected to get a good amount of coverage across the province without having too many cells and increacing the computational requirements.
 ```{r QuadratAnalysis, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 ##Quadrat Analysis
 ##First, determine the number of quadrats. You need to specify a number that makes sense given the number of points and the size of the study area. Note that quads equals the number of rows or columns in your quads dataset, therefore the actual number is quads^2 
@@ -678,6 +686,36 @@ quadResults <- data.frame(Quadrats = quads * quads,
 #Print a table of the results.
 print(quadResults)
 
+# Create table to display the values
+quadtable <- tableGrob(quadResults, rows = c("")) #make a table "Graphical Object" (GrOb) 
+quadCaption <- textGrob("Quadrat Analysis Table", gp = gpar(fontsize = 09))
+padding <- unit(5, "mm")
+
+quadtable <- gtable_add_rows(quadtable, 
+                            heights = grobHeight(quadCaption) + padding, 
+                            pos = 0)
+
+quadtable <- gtable_add_grob(quadtable,
+                            quadCaption, t = 1, l = 2, r = ncol(quadResults) + 1)
+
+grid.arrange(quadtable, newpage = TRUE)
+```
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/b6a40d47-7f1c-4a2b-9d2e-f0321ce07022" alt="QuadratTable" width="800" />
+</div>
+<p style="text-align: center;"><em> Figure 8: Quadrat Analysis Results Table</em></p>
+
+These results show that the points in our study area are highly clustered. The variance is much larger than the mean, indicating a big difference in the number of points across the quadrats, and with the VMR being 497.33, this suggests that the points are clustered together. The chi-square value is very large, confirming that this clustering is statistically significant.
+
+## K-Function
+Our last point pattern analysis method, K-function, is a powerful tool for understanding spatial patterns and how they change across different distances. Unlike other methods that look at a single scale, the K-function helps us explore patterns at multiple scales, providing a deeper understanding of clustering or dispersion in the data.
+
+The K-function works by comparing the actual distribution of points to what would be expected in a completely random pattern. It calculates the number of points within varying distances of each other and examines whether there are more or fewer points than expected at those distances. If more points are found than expected, the pattern is likely clustered, but if fewer points are found, it suggests dispersion.
+
+This method is useful for analyzing second-order variability, as it focuses on the relationships between points at different distances. For example, it can show whether clustering occurs at close distances but transitions to random or dispersed patterns farther away.
+
+The results are visualized in a graph comparing the observed pattern to an expected random pattern. This makes it easy to see where clustering or dispersion occurs and at what scales these patterns emerge.
+```{r KFunction, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 ##K-FUNCTION 
 #Create a basic k-function
 k.fun <- Kest(pests.ppp, correction = "Ripley")
@@ -687,8 +725,17 @@ k.fun <- Kest(pests.ppp, correction = "Ripley")
 k.fun.e <- envelope(pests.ppp, Kest, nsim = 99, correction = "Ripley", verbose = FALSE)
 plot(k.fun.e, main = "")
 ```
-# Mapping the Forest Pest Disturbance Density
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/dca9a09c-e0cb-419d-8e37-5c008657f924" alt="KFunPlot" width="800" />
+</div>
+<p style="text-align: center;"><em> Figure 9: K-Function Plot</em></p>
 
+The K-function plot shows that at smaller distances, the observed point pattern closely follows the expected random distribution (Red line), indicating a random arrangement of points at these scales. However, as the distance increases, the observed K-function moves further away from the expected line, suggesting that the points become increasingly clustered at larger distances. This shows that the points may appear randomly distributed on smaller scales, but they tend to cluster in certain areas when you get to larger scales.
+
+Overall, the results from these three point pattern analyses indicate that the points are clustered rather than randomly distributed. Both the Nearest Neighbour and Quadrat Analyses suggest clustering, and the K-function analysis supports this by showing that the observed distribution deviates from the expected random pattern as the distance increases. These findings highlight a clear pattern of clustering across all three methods. 
+
+# Mapping the Forest Pest Disturbance Density
+Now that we have determined the spatial distribution of points, we can move on to creating a density map of the events. This will provide us with a visual aid to understand the patterns of the events across BC. The only parameter needed for this section is the resolution of the final output. In an effort to be consistant across this project, we will match the resolution of 25,000 that we used in IDW and Kriging.
 ```{r MapPestDensity, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Ensure bbox2 is valid and formatted correctly
 bbox2 <- st_bbox(bc_boundary)
@@ -724,7 +771,13 @@ ggplot() +
        fill = "Density")
 
 ggsave("./Output/Pest_Infestation_DensityMap.png", width = 10, height = 8, dpi = 300)
+```
+<div style="display: flex;">
+  <img src="https://github.com/user-attachments/assets/e71278ae-8ad7-4902-8200-35a4077188b2" alt="Pest Density Map" width="800" />
+</div>
+<p style="text-align: center;"><em> Figure 10: Map of Pest Infestation Event Density Across BC in 2022</em></p>
 
+```{r MapPestDensityPoint, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Convert the raster to a data frame
 density_df <- as.data.frame(density_raster, xy = TRUE)
 
@@ -798,6 +851,7 @@ final_data_df <- st_drop_geometry(final_data)
 # Write as CSV
 write.csv(final_data_df, "./Output/final_data.csv", row.names = FALSE)
 ```
+
 # Ordinary Least Squares Regression
 
 ```{r OLSRegression, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
